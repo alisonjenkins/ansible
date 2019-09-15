@@ -70,10 +70,9 @@
       - name: Sudo cofiguration
         block:
           - name: keep ssh_auth_sock
-            lineinfile:
+            copy:
               path: /etc/sudoers.d/keep_auth_sock
-              state: present
-              line: 'Defaults env_keep+=SSH_AUTH_SOCK'
+              content: 'Defaults env_keep+=SSH_AUTH_SOCK'
               validate: 'visudo -cf %s'
       - name: Install base packages
         package:
