@@ -14,4 +14,9 @@
     aur:
       name: yay
       use: makepkg
-      state: latest
+    become: yes
+    become_user: aur_builder
+  - name: make sure that vim is installed
+    package:
+      name: vim
+      state: present
