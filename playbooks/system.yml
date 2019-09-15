@@ -72,7 +72,7 @@
           - name: keep ssh_auth_sock
             copy:
               dest: /etc/sudoers.d/keep_auth_sock
-              content: 'Defaults env_keep+=SSH_AUTH_SOCK'
+              content: 'Defaults env_keep+=SSH_AUTH_SOCK\n'
       - name: Install base packages
         package:
           name: "{{ item }}"
