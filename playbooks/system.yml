@@ -67,6 +67,14 @@
 
   - name: Install base system
     block:
+      - name: Sudo cofiguration
+        block:
+          - name: keep ssh_auth_sock
+            lineinfile:
+              path: /etc/sudoers.d/keep_auth_sock
+              state: present
+              line: 'Defaults env_keep+=SSH_AUTH_SOCK'
+              validate: 'visudo -cf %s'
       - name: Install base packages
         package:
           name: "{{ item }}"
@@ -91,6 +99,31 @@
         command: /usr/bin/pkgfile -u
         args:
           creates: /var/cache/pkgfile/core.files
+      - name: Create systemd-timer for updating pkfile db once per day
+				block:
+					copy:
+						dest: /etc/systemd/system/pkgfile_update_cron.timer
+						content: |
+							[Unit]
+							Description=Update pkgfile db daily at 1500
+
+							[Timer]
+							OnCalendar=*:15
+							Persistent=true
+
+							[Install]
+							WantedBy=timers.target
+					copy:
+            dest: /etc/systemd/system/pkgfile_update_cron.service
+            content: |
+              [Unit]
+              Description=Update pkgfile daily at 1500
+
+              [Timer]
+              OnCalendar=*:15
+
+              [Install]
+              WantedBy=timers.target
       - name: Setup NTP
         block:
           - name: Set timezone
