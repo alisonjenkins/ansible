@@ -391,7 +391,11 @@
           path: /home/alan/.dotsyncrc
           owner: alan
           group: alan
-      # - command: 
+      - command: ./bin/dotsyncrc -L
+        args:
+          chdir: /home/alan/git/dotfiles
+        become: yes
+        become_user: alan
 
 
 
