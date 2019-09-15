@@ -346,6 +346,12 @@
         - zramswap
         become: yes
         become_user: aur_builder
+    - name: Start and enable sddm service
+      service:
+        name: sddm
+        state: started
+        enabled: yes
+
 
 
 
