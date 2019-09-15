@@ -74,6 +74,11 @@
               dest: /etc/sudoers.d/keep_auth_sock
               src: /etc/ansible/files/sudoers/keep_auth_sock
               validate: 'visudo -cf %s'
+          - name: wheel sudo group
+            copy:
+              dest: /etc/sudoers.d/wheel_sudo
+              src: /etc/ansible/files/sudoers/wheel_sudo
+              validate: 'visudo -cf %s'
       - name: Install base packages
         package:
           name: "{{ item }}"
