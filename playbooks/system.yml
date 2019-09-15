@@ -391,9 +391,9 @@
           path: /home/alan/.dotsyncrc
           owner: alan
           group: alan
-      - command: ./bin/dotsyncrc -L
+      - command: ./dotsync -L
         args:
-          chdir: /home/alan/git/dotfiles
+          chdir: /home/alan/git/dotfiles/bin/dotsync/bin/
         become: yes
         become_user: alan
 
