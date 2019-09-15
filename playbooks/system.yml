@@ -101,29 +101,29 @@
           creates: /var/cache/pkgfile/core.files
       - name: Create systemd-timer for updating pkfile db once per day
         block:
-          copy:
-            dest: /etc/systemd/system/pkgfile_update_cron.timer
-            content: |
-              [Unit]
-              Description=Update pkgfile db daily at 1500
+          - copy:
+              dest: /etc/systemd/system/pkgfile_update_cron.timer
+              content: |
+                [Unit]
+                Description=Update pkgfile db daily at 1500
 
-              [Timer]
-              OnCalendar=*:15
-              Persistent=true
+                [Timer]
+                OnCalendar=*:15
+                Persistent=true
 
-              [Install]
-              WantedBy=timers.target
-          copy:
-            dest: /etc/systemd/system/pkgfile_update_cron.service
-            content: |
-              [Unit]
-              Description=Update pkgfile daily at 1500
+                [Install]
+                WantedBy=timers.target
+          - copy:
+              dest: /etc/systemd/system/pkgfile_update_cron.service
+              content: |
+                [Unit]
+                Description=Update pkgfile daily at 1500
 
-              [Timer]
-              OnCalendar=*:15
+                [Timer]
+                OnCalendar=*:15
 
-              [Install]
-              WantedBy=timers.target
+                [Install]
+                WantedBy=timers.target
       - name: Setup NTP
         block:
           - name: Set timezone
