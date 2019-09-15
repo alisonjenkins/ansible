@@ -369,19 +369,20 @@
       enabled: yes
 
   - name: Setup user dotfiles
-    - file:
-        state: directory
-        path: /home/alan/git
-        mode: 0700
-        owner: alan
-        group: alan
-    - git:
-        accept_hostkey: yes
-        depth: 1
-        dest: /home/alan/git/dotfiles
-        repo: https://gitlab.com/alanjjenkins/dotfiles.git
-      become: yes
-      become_user: alan
+    block:
+      - file:
+          state: directory
+          path: /home/alan/git
+          mode: 0700
+          owner: alan
+          group: alan
+      - git:
+          accept_hostkey: yes
+          depth: 1
+          dest: /home/alan/git/dotfiles
+          repo: https://gitlab.com/alanjjenkins/dotfiles.git
+        become: yes
+        become_user: alan
 
 
 
