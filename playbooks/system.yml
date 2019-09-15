@@ -48,6 +48,10 @@
           state: present
           line: 'MAKEFLAGS="-j8"'
           regexp: '^MAKEFLAGS='
+      - name: ensure ccache is installed
+        package:
+          name: ccache
+          state: present
 
   - name: ensure the 'yay' aur helper is installed
     aur:
