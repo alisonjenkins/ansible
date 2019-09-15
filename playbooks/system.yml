@@ -99,7 +99,8 @@
           creates: /var/cache/pkgfile/core.files
       - name: Create systemd-timer for updating pkfile db once per day
         block:
-          - copy:
+          - name: Create pkgfile update cron timer
+            copy:
               dest: /etc/systemd/system/pkgfile_update_cron.timer
               content: |
                 [Unit]
@@ -111,7 +112,8 @@
 
                 [Install]
                 WantedBy=timers.target
-          - copy:
+          - name: Create pkgfile update cron service
+            copy:
               dest: /etc/systemd/system/pkgfile_update_cron.service
               content: |
                 [Unit]
