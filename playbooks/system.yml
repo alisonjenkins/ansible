@@ -10,6 +10,45 @@
       line: 'aur_builder ALL=(ALL) NOPASSWD: /usr/bin/pacman'
       create: yes
       validate: 'visudo -cf %s'
+  - name: Arch tweaks
+    block:
+      - name: configure parallel package compression
+        lineinfile:
+          path: /etc/makepkg.conf
+          state: present
+          line: 'COMPRESSXZ=(xz -c -z - --threads=0)'
+          regexp: '^COMPRESSXZ='
+      - name: set C compiler flags
+        lineinfile:
+          path: /etc/makepkg.conf
+          state: present
+          line: 'CFLAGS="-march=native -O2 -pipe -fstack-protector-strong"'
+          regexp: '^CFLAGS='
+      - name: set C++ compiler flags
+        lineinfile:
+          path: /etc/makepkg.conf
+          state: present
+          line: 'CXXFLAGS="${CFLAGS}"'
+          regexp: '^CXXFLAGS='
+      - name: set makepkg options
+        lineinfile:
+          path: /etc/makepkg.conf
+          state: present
+          line: 'OPTIONS=(strip docs !libtool !staticlibs emptydirs zipman purge !optipng !upx !debug)'
+          regexp: '^OPTIONS='
+      - name: set makepkg buildenv
+        lineinfile:
+          path: /etc/makepkg.conf
+          state: present
+          line: 'BUILDENV=(!distcc color ccache check !sign)'
+          regexp: '^BUILDENV='
+      - name: setup parallel make jobs
+        lineinfile:
+          path: /etc/makepkg.conf
+          state: present
+          line: 'MAKEFLAGS="-j8"'
+          regexp: '^MAKEFLAGS='
+
   - name: ensure the 'yay' aur helper is installed
     aur:
       name: yay
