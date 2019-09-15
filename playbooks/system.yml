@@ -67,9 +67,10 @@
 
   - name: Install base system
     block:
-      package:
-        name: {{item}}
-        state: present
+      - name: Install base packages
+        package:
+          name: {{item}}
+          state: present
         with_items:
           - augeas
           - bash-completion
@@ -86,5 +87,34 @@
           - ranger
           - rsync
           - tmux
-      command: /usr/bin/pkgfile -u
-        creates: /var/cache/pkgfile/core.files
+
+      - name: Generate initial pkgfile db
+        command: /usr/bin/pkgfile -u
+          creates: /var/cache/pkgfile/core.files
+
+      - name: Setup NTP
+        block:
+          - name: NTP config
+            lineinfile:
+              path: /etc/systemd/timesyncd.conf
+              state: present
+              line: 'NTP=0.arch.pool.ntp.org 1.arch.pool.ntp.org 2.arch.pool.ntp.org 3.arch.pool.ntp.org'
+              regexp: '^NTP='
+              validate: 'timedatectl show-timesync --all'
+              notify: reload systemd-timesyncd
+          - name: NTP config fallback
+            lineinfile:
+              path: /etc/systemd/timesyncd.conf
+              state: present
+              line: 'FallbackNTP=0.pool.ntp.org 1.pool.ntp.org 0.fr.pool.ntp.org'
+              regexp: '^FallbackNTP='
+              validate: 'timedatectl show-timesync --all'
+              notify: reload systemd-timesyncd
+          - name: NTP initial sync
+            shell: if ! /usr/bin/timedatectl status | /usr/bin/grep \'NTP synchronized: yes\'; /usr/bin/timedatectl set-ntp true
+
+  handlers:
+    - name: reload systemd-timesyncd
+      service:
+        name: systemd-timesyncd
+        state: restarted
