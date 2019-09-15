@@ -69,7 +69,7 @@
     block:
       - name: Install base packages
         package:
-          name: {{item}}
+          name: "{{ item }}"
           state: present
         with_items:
           - augeas
@@ -89,7 +89,7 @@
           - tmux
       - name: Generate initial pkgfile db
         command: /usr/bin/pkgfile -u
-          creates: /var/cache/pkgfile/core.files
+        creates: /var/cache/pkgfile/core.files
       - name: Setup NTP
         block:
           - name: NTP config
