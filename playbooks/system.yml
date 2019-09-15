@@ -292,7 +292,7 @@
         - polybar
         - postman-bin
         - powerline-fonts
-        - powershell
+        # - powershell
         - pulseaudio-modules-bt-git
         - pv
         - pwgen
@@ -315,7 +315,7 @@
         - steam-native-runtime
         - strace
         - stressapptest
-        - swagger-codegen
+        # - swagger-codegen
         - swagger-editor-git
         - sway-git
         - swayidle-git
