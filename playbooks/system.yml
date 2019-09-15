@@ -73,7 +73,6 @@
             copy:
               dest: /etc/sudoers.d/keep_auth_sock
               content: 'Defaults env_keep+=SSH_AUTH_SOCK'
-              validate: 'visudo -cf %s'
       - name: Install base packages
         package:
           name: "{{ item }}"
