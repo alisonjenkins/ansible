@@ -346,10 +346,10 @@
         - zramswap
         become: yes
         become_user: aur_builder
-    - name: Enable sddm service
-      service:
-        name: sddm
-        enabled: yes
+  - name: Enable sddm service
+    service:
+      name: sddm
+      enabled: yes
 
 
 
