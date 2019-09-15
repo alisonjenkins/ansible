@@ -175,7 +175,7 @@
         - chromium-widevine
         - cksfv
         - clight
-        - cloud-print-connector-git
+        # - cloud-print-connector-git
         - cmus
         - compton
         - ctags
