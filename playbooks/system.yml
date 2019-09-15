@@ -58,7 +58,7 @@
               path: /etc/pacman.conf
               state: present
               line: '[multilib]'
-              regexp: '^#[multilib]'
+              regexp: "^#\[multilib\]"
           - lineinfile:
               path: /etc/pacman.conf
               state: present
