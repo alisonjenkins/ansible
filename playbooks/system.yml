@@ -64,7 +64,7 @@
               state: present
               line: 'Include = /etc/pacman.d/mirrorlist'
               regexp: '^#Include = /etc/pacman.d/mirrorlist'
-          command: pacman -Sy
+          - command: pacman -Sy
 
 
   - name: ensure the 'yay' aur helper is installed
