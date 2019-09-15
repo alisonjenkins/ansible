@@ -148,6 +148,14 @@
             notify: reload systemd-timesyncd
           - name: NTP initial sync
             shell: "if ! /usr/bin/timedatectl status | /usr/bin/grep 'NTP synchronized: yes'; then /usr/bin/timedatectl set-ntp true; fi"
+    - name: Create users
+      user:
+        name: "alan"
+        comment: "Alan Jenkins"
+        groups: docker,sys,wheel,audio
+        append: yes
+
+
   handlers:
     - name: reload systemd-timesyncd
       service:
