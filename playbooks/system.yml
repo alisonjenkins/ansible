@@ -385,6 +385,14 @@
           repo: https://gitlab.com/alanjjenkins/dotfiles.git
         become: yes
         become_user: alan
+      - file:
+          state: link
+          src: /home/alan/dotfiles/dotsyncrc
+          path: /home/alan/.dotsyncrc
+          owner: alan
+          group: alan
+      # - command: 
+
 
 
 
