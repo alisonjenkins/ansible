@@ -99,7 +99,6 @@
               state: present
               line: 'NTP=0.arch.pool.ntp.org 1.arch.pool.ntp.org 2.arch.pool.ntp.org 3.arch.pool.ntp.org'
               regexp: '^NTP='
-              validate: 'timedatectl show-timesync --all'
             notify: reload systemd-timesyncd
           - name: NTP config fallback
             lineinfile:
@@ -107,7 +106,6 @@
               state: present
               line: 'FallbackNTP=0.pool.ntp.org 1.pool.ntp.org 0.fr.pool.ntp.org'
               regexp: '^FallbackNTP='
-              validate: 'timedatectl show-timesync --all'
             notify: reload systemd-timesyncd
           - name: NTP initial sync
             shell: "if ! /usr/bin/timedatectl status | /usr/bin/grep 'NTP synchronized: yes'; /usr/bin/timedatectl set-ntp true"
