@@ -52,6 +52,18 @@
         package:
           name: ccache
           state: present
+      - name: Enable Arch multilib repo
+        block:
+          lineinfile:
+            path: /etc/pacman.conf
+            state: present
+            line: '[multilib]'
+            regexp: '^#[multilib]'
+          lineinfile:
+            path: /etc/pacman.conf
+            state: present
+            line: 'Include = /etc/pacman.d/mirrorlist'
+            regexp: '^#Include = /etc/pacman.d/mirrorlist'
 
   - name: ensure the 'yay' aur helper is installed
     aur:
