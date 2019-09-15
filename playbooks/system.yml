@@ -64,3 +64,27 @@
     package:
       name: vim
       state: present
+
+  - name: Install base system
+    block:
+      package:
+        name: {{item}}
+        state: present
+        with_items:
+          - augeas
+          - bash-completion
+          - docker
+          - git
+          - gvim
+          - htop
+          - linux-headers
+          - moreutils
+          - ncdu
+          - pkgfile
+          - python-pip
+          - python2-pip
+          - ranger
+          - rsync
+          - tmux
+      command: /usr/bin/pkgfile -u
+        creates: /var/cache/pkgfile/core.files
