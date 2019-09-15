@@ -71,7 +71,7 @@
         block:
           - name: keep ssh_auth_sock
             copy:
-              path: /etc/sudoers.d/keep_auth_sock
+              dest: /etc/sudoers.d/keep_auth_sock
               content: 'Defaults env_keep+=SSH_AUTH_SOCK'
               validate: 'visudo -cf %s'
       - name: Install base packages
