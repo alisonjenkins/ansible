@@ -239,7 +239,7 @@
         - keepassx
         - keybase-gui
         - kitty
-        - lib32-gamemode-git
+        # - lib32-gamemode-git
         - lib32-vulkan-icd-loader
         - libinput-gestures
         - libreoffice-fresh-en-gb
@@ -347,7 +347,7 @@
         - wireguard-dkms
         - wireguard-tools
         - wireshark-git
-        - xboxdrv
+        # - xboxdrv
         - xclip
         - xorg-fonts-misc
         - xorg-server-xwayland
