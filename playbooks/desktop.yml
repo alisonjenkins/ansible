@@ -46,7 +46,7 @@
         lineinfile:
           path: /etc/makepkg.conf
           state: present
-          line: 'MAKEFLAGS="-j8"'
+          line: 'MAKEFLAGS="-j -l $(echo "($(tac /proc/cpuinfo | grep -oP -m 1 \'processor.*: \K(.*)\') + 1) * 2" | bc -l)"'
           regexp: '^MAKEFLAGS='
       - name: ensure ccache is installed
         package:
@@ -61,7 +61,6 @@
                 [multilib]
                 Include = /etc/pacman.d/mirrorlist
           - command: pacman -Sy
-
 
   - name: ensure the 'yay' aur helper is installed
     aur:
