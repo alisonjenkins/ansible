@@ -388,7 +388,7 @@
           group: alan
       - command: ./dotsync -L
         args:
-          chdir: /home/alan/git/dotfiles/bin/dotsync/bin/
+          chdir: /home/alan/git/dotfiles/bin/
         become: yes
         become_user: alan
 
