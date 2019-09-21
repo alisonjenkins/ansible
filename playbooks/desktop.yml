@@ -46,7 +46,7 @@
         lineinfile:
           path: /etc/makepkg.conf
           state: present
-          line: 'MAKEFLAGS="-j -l 8'
+          line: 'MAKEFLAGS="-j -l 8"'
           regexp: '^MAKEFLAGS='
       - name: ensure ccache is installed
         package:
