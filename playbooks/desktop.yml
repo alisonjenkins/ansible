@@ -172,6 +172,12 @@
           name: "{{ item }}"
           skip_installed: true
         with_items:
+        # - cloud-print-connector-git
+        # - howdy
+        # - lib32-gamemode-git
+        # - powershell
+        # - swagger-codegen
+        # - xboxdrv
         - appimage-git
         - arandr
         - aria2
@@ -189,7 +195,6 @@
         - chromium-widevine
         - cksfv
         - clight
-        # - cloud-print-connector-git
         - cmus
         - compton
         - ctags
@@ -216,7 +221,6 @@
         - go
         - graphviz
         - handbrake
-        # - howdy
         - i3-wm
         - i3blocks
         - i3blocks-contrib-git
@@ -234,7 +238,6 @@
         - keepassx
         - keybase-gui
         - kitty
-        # - lib32-gamemode-git
         - lib32-vulkan-icd-loader
         - libinput-gestures
         - libreoffice-fresh-en-gb
@@ -287,7 +290,6 @@
         - polybar
         - postman-bin
         - powerline-fonts
-        # - powershell
         - pulseaudio-modules-bt-git
         - pv
         - pwgen
@@ -310,7 +312,6 @@
         - steam-native-runtime
         - strace
         - stressapptest
-        # - swagger-codegen
         - swagger-editor-git
         - sway-git
         - swayidle-git
@@ -342,7 +343,6 @@
         - wireguard-dkms
         - wireguard-tools
         - wireshark-git
-        # - xboxdrv
         - xclip
         - xorg-fonts-misc
         - xorg-server-xwayland
@@ -357,6 +357,7 @@
         - xscreensaver
         - xsel
         - xss-lock
+        - yarn
         - zramswap
         become: yes
         become_user: aur_builder
