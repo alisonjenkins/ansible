@@ -54,16 +54,12 @@
           state: present
       - name: Enable Arch multilib repo
         block:
-          - lineinfile:
+          - blockinfile:
               path: /etc/pacman.conf
               state: present
-              line: '[multilib]'
-              regexp: "^#\\[multilib\\]"
-          - lineinfile:
-              path: /etc/pacman.conf
-              state: present
-              line: 'Include = /etc/pacman.d/mirrorlist'
-              regexp: '^#Include = /etc/pacman.d/mirrorlist'
+              block: |
+                [multilib]
+                Include = /etc/pacman.d/mirrorlist
           - command: pacman -Sy
 
 
@@ -102,7 +98,7 @@
           - bash-completion
           - docker
           - git
-          - gvim
+          # - gvim
           - htop
           - linux-headers
           - moreutils
