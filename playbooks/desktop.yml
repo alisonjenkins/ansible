@@ -399,6 +399,12 @@
           mode: 0700
           owner: alan
           group: alan
+      - file:
+          state: directory
+          path: /home/alan/.gnupg
+          mode: 0700
+          owner: alan
+          group: alan
       - git:
           accept_hostkey: yes
           depth: 1
