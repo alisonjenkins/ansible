@@ -43,7 +43,7 @@
           line: 'BUILDENV=(!distcc color ccache check !sign)'
           regexp: '^BUILDENV='
       - name: setup parallel make jobs
-        lineinfile:
+        inifile:
           path: /etc/makepkg.conf
           state: present
           line: 'MAKEFLAGS="-j {{ ansible_processor_cores * ansible_processor_threads_per_core }}"'
@@ -53,11 +53,12 @@
           name: aria2
           state: present
       - name: setup parallel downloads for pacman
-        lineinfile:
+        ini_file:
           path: /etc/pacman.conf
           state: present
-          line: 'XferCommand = /usr/bin/aria2c --allow-overwrite=true --continue=true --file-allocation=none --log-level=error --max-tries=2 --max-connection-per-server=2 --max-file-not-found=5 --min-split-size=5M --no-conf --remote-time=true --summary-interval=60 --timeout=5 --dir=/ --out %o %u'
-          regexp: '^XferCommand ='
+          section: options
+          option: XferCommand
+          value: /usr/bin/aria2c --allow-overwrite=true --continue=true --file-allocation=none --log-level=error --max-tries=2 --max-connection-per-server=2 --max-file-not-found=5 --min-split-size=5M --no-conf --remote-time=true --summary-interval=60 --timeout=5 --dir=/ --out %o %u'
       - name: ensure ccache is installed
         package:
           name: ccache
