@@ -46,7 +46,7 @@
         lineinfile:
           path: /etc/makepkg.conf
           state: present
-          line: 'MAKEFLAGS="-j {{ ansible_processor_cores * 2}}"'
+          line: 'MAKEFLAGS="-j {{ ansible_processor_cores * ansible_processor_threads_per_core }}"'
           regexp: '^MAKEFLAGS='
       - name: Ensure aria2 is installed
         package:
