@@ -43,7 +43,7 @@
           line: 'BUILDENV=(!distcc color ccache check !sign)'
           regexp: '^BUILDENV='
       - name: setup parallel make jobs
-        inifile:
+        lineinfile:
           path: /etc/makepkg.conf
           state: present
           line: 'MAKEFLAGS="-j {{ ansible_processor_cores * ansible_processor_threads_per_core }}"'
