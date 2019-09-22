@@ -97,17 +97,26 @@
           - bash-completion
           - docker
           - git
-          # - gvim
           - htop
           - linux-headers
           - moreutils
           - ncdu
+          - network-manager-sstp
+          - networkmanager
+          - networkmanager-openconnect
+          - networkmanager-openvpn
+          - networkmanager-pptp
+          - networkmanager-vpnc
+          - nm-connection-editor
           - pkgfile
           - python-pip
           - python2-pip
           - ranger
           - rsync
           - tmux
+      - name: Enable network manager
+        service: networkmanager
+        enable: true
       - name: Generate initial pkgfile db
         command: /usr/bin/pkgfile -u
         args:
@@ -261,7 +270,6 @@
         - nemo-terminal
         - neovim
         - nethogs
-        - networkmanager-openvpn
         - nmap
         - npm
         - nvidia-dkms
