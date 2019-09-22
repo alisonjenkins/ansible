@@ -402,6 +402,7 @@
           state: link
           src: /run/user/1001/keybase/kbfs/private/ajenkins/ssh-keys
           path: /home/alan/git/ssh-keys
+          force: yes
           mode: 0700
           owner: alan
           group: alan
