@@ -286,6 +286,8 @@
         - npm
         - nvidia-dkms
         - nvidia-settings
+        - nvidia-utils
+        - lib32-nvidia-utils
         - nvme-cli
         - obs-studio
         - openttd
