@@ -46,7 +46,7 @@
         lineinfile:
           path: /etc/makepkg.conf
           state: present
-          line: 'MAKEFLAGS="-j -l 8"'
+          line: 'MAKEFLAGS="-j $(echo "$(grep -E "^processor" | wc -l ) * 2" | bc -l") "'
           regexp: '^MAKEFLAGS='
       - name: Ensure aria2 is installed
         package:
