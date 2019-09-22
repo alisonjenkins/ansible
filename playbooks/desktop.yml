@@ -115,8 +115,9 @@
           - rsync
           - tmux
       - name: Enable network manager
-        service: networkmanager
-        enabled: true
+        service:
+          name: networkmanager
+          enabled: true
       - name: Generate initial pkgfile db
         command: /usr/bin/pkgfile -u
         args:
