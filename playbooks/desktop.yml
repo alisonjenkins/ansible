@@ -374,6 +374,12 @@
           mode: 0700
           owner: alan
           group: alan
+      - file:
+          state: directory
+          path: /home/alan/.config
+          mode: 0700
+          owner: alan
+          group: alan
       - git:
           accept_hostkey: yes
           depth: 1
@@ -389,13 +395,16 @@
           group: alan
       - command: ./dotsync -L
         args:
-          chdir: /home/alan/git/dotfiles/bin/
+          chdir: /home/alan/git/dotfiles/dotsync/bin/
         become: yes
         become_user: alan
-
-
-
-
+      - file:
+          state: link
+          src: /run/user/1001
+          path: /home/alan/git
+          mode: 0700
+          owner: alan
+          group: alan
 
   handlers:
     - name: reload systemd-timesyncd
