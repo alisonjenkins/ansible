@@ -400,8 +400,8 @@
         become_user: alan
       - file:
           state: link
-          src: /run/user/1001
-          path: /home/alan/git
+          src: /run/user/1001/keybase/kbfs/private/ajenkins/ssh-keys
+          path: /home/alan/git/ssh-keys
           mode: 0700
           owner: alan
           group: alan
