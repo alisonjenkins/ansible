@@ -437,6 +437,14 @@
           mode: 0700
           owner: alan
           group: alan
+      - file:
+          state: link
+          src: /run/user/1001/keybase/kbfs/private/ajenkins/pass-password-store
+          path: /home/alan/.password-store
+          force: yes
+          mode: 0700
+          owner: alan
+          group: alan
 
   handlers:
     - name: reload systemd-timesyncd
