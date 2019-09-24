@@ -285,6 +285,7 @@
         - nemo-terminal
         - neovim
         - nethogs
+        - network-manager-applet
         - nmap
         - npm
         - nvidia-dkms
