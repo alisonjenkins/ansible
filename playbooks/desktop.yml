@@ -430,8 +430,8 @@
         become_user: alan
       - file:
           state: link
-          src: /run/user/1001/keybase/kbfs/private/ajenkins/ssh-keys
-          path: /home/alan/git/ssh-keys
+          src: /run/user/1001/keybase/kbfs/private/ajenkins/ssh_keys
+          path: /home/alan/git/ssh_keys
           force: yes
           mode: 0700
           owner: alan
