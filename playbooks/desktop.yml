@@ -259,6 +259,7 @@
         - keepassx
         - keybase-gui
         - kitty
+        - lib32-nvidia-utils
         - lib32-vulkan-icd-loader
         - libinput-gestures
         - libreoffice-fresh-en-gb
@@ -287,7 +288,6 @@
         - nvidia-dkms
         - nvidia-settings
         - nvidia-utils
-        - lib32-nvidia-utils
         - nvme-cli
         - obs-studio
         - openttd
@@ -362,6 +362,7 @@
         - vpn-unlimited
         - vulkan-tools
         - waybar
+        - winetricks
         - wireguard-dkms
         - wireguard-tools
         - wireshark-git
