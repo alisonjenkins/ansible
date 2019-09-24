@@ -206,6 +206,7 @@
         - at
         - augeas
         - awesome-terminal-fonts
+        - aws-cli
         - bind-tools
         - blueman
         - bluez
