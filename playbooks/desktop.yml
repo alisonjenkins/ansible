@@ -221,6 +221,7 @@
         - compton
         - ctags
         - deluge
+        - direnv
         - discord
         - dmenu
         - dmidecode
