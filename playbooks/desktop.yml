@@ -239,6 +239,7 @@
         - gamemode-git
         - geekbench
         - gimp
+        - git-credential-gnome-keyring
         - gitahead-bin
         - go
         - graphviz
