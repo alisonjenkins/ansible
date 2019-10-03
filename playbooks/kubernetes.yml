@@ -1,0 +1,115 @@
+---
+- hosts: kubernetes
+  gather_facts: no
+  tags: [ never, init ]
+  tasks:
+    - name: Get pacman latest package list
+      raw:  echo -n 'root' | su -c 'pacman -Sy' root
+    - name: Bootstrap a host without python3 installed
+      raw:  pacman -Ql python > /dev/null || echo -n 'root' | su -c 'pacman -S extra/python --noconfirm' root
+
+- hosts: kubernetes
+  tags: [ never, init ]
+  tasks:
+    - name: Install sudo
+      become: yes
+      become_user: root
+      become_method: su
+      package:
+        name: sudo
+        state: present
+    - name: wheel sudo group
+      become: yes
+      become_user: root
+      become_method: su
+      copy:
+        dest: /etc/sudoers.d/wheel_sudo
+        src: /etc/ansible/files/sudoers/wheel_sudo
+        validate: 'visudo -cf %s'
+    - name: Create aur_builder user.
+      become: yes
+      become_user: root
+      become_method: su
+      user:
+        name: aur_builder
+        group: wheel
+    - name: Configure sudoers for aur_builder
+      become: yes
+      become_user: root
+      become_method: su
+      lineinfile:
+        path: /etc/sudoers.d/11-install-aur_builder
+        line: 'aur_builder ALL=(ALL) NOPASSWD: /usr/bin/pacman'
+        create: yes
+        validate: 'visudo -cf %s'
+    - name: Install makepkg dependencies
+      become: yes
+      become_user: root
+      become_method: su
+      package:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - fakeroot
+        - base-devel
+    - name: ensure the 'yay' aur helper is installed
+      become: yes
+      become_user: aur_builder
+      become_method: sudo
+      aur:
+        name: yay
+        skip_installed: true
+        use: makepkg
+
+- hosts: kubernetes
+  remote_user: alarm
+  become: yes
+  become_user: aur_builder
+  tasks:
+    - name: Ensure kubernetes dependencies are installed
+      package:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - ebtables
+        - ethtool
+        - socat
+    - name: Ensure kubernetes is installed
+      aur:
+        name: kubernetes-bin
+        skip_installed: true
+
+- hosts: kubernetes
+  become: yes
+  become_user: root
+  tasks:
+  - name: Set hostname
+    hostname:
+      name: "{{ inventory_hostname }}"
+  - name: Ensure docker is installed
+    package:
+      name: docker
+      state: present
+  - name: Configure docker to use systemd cgroup driver
+    template:
+      src: /etc/ansible/templates/docker/docker-daemon-kubernetes.json
+      dest: /etc/docker/daemon.json
+  - name: Docker service started and enabled
+    service:
+      name: docker
+      state: started
+      enabled: yes
+  - name: kubeadm init k8s master config
+    template:
+      src: /etc/ansible/templates/kubernetes/kubeadm-init-master-config.yml
+      dest: /etc/kubernetes/kubeadm-init-master-config.yml
+    when: inventory_hostname is match("k8s-master-\d*")
+  - name: Ensure kubelet enabled
+    service:
+      name: kubelet
+      enabled: yes
+  - name: kubeadm init k8s masters
+    become: yes
+    become_user: root
+    command: kubeadm init --config /etc/kubernetes/kubeadm-init-master-config.yml
+    when: inventory_hostname is match("k8s-master-\d*")

@@ -413,11 +413,6 @@
           mode: 0700
           owner: alan
           group: alan
-      - git:
-          accept_hostkey: yes
-          depth: 1
-          dest: /home/alan/git/dotfiles
-          repo: https://gitlab.com/alanjjenkins/dotfiles.git
         become: yes
         become_user: alan
       - file:
@@ -447,6 +442,11 @@
           mode: 0700
           owner: alan
           group: alan
+      - git:
+          accept_hostkey: yes
+          depth: 1
+          dest: /home/alan/git/dotfiles
+          repo: https://gitlab.com/alanjjenkins/dotfiles.git
 
   handlers:
     - name: reload systemd-timesyncd
