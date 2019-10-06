@@ -3,15 +3,27 @@ localhost ansible_connection=local
 
 [kubernetes]
 #kube-master-1 ansible_host=192.168.86.25 ansible_user=alarm
-k8s-master-1 ansible_host=192.168.86.26 ansible_user=alarm
-k8s-worker-1 ansible_host=192.168.86.22 ansible_user=alarm
+k8s-master-01 ansible_host=192.168.86.110
+k8s-worker-01 ansible_host=192.168.86.111
+k8s-worker-02 ansible_host=192.168.86.112
+k8s-worker-03 ansible_host=192.168.86.113
+
+[kubernetes_masters]
+k8s-master-01
+
+[kubernetes_workers]
+k8s-worker-01
+k8s-worker-02
+k8s-worker-03
 
 [py3hosts]
-k8s-master-1
-k8s-worker-1
+k8s-master-01
+k8s-worker-01
+k8s-worker-02
+k8s-worker-03
 
 [py3hosts:vars]
 ansible_python_interpreter=/usr/bin/python3
 
 [kubernetes:vars]
-ansible_password=fech|aiph9co=w3uch6J
+ansible_password=raspberry

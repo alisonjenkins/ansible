@@ -1,71 +1,73 @@
 ---
 - hosts: kubernetes
-  gather_facts: no
-  tags: [ never, init ]
+  tags: [ never, reboot ]
+  become: yes
   tasks:
-    - name: Get pacman latest package list
-      raw:  echo -n 'root' | su -c 'pacman -Sy' root
-    - name: Bootstrap a host without python3 installed
-      raw:  pacman -Ql python > /dev/null || echo -n 'root' | su -c 'pacman -S extra/python --noconfirm' root
+    - reboot:
 
 - hosts: kubernetes
+  remote_user: pi
+  become: yes
   tags: [ never, init ]
   tasks:
-    - name: Install sudo
-      become: yes
-      become_user: root
-      become_method: su
-      package:
-        name: sudo
-        state: present
-    - name: wheel sudo group
-      become: yes
-      become_user: root
-      become_method: su
-      copy:
-        dest: /etc/sudoers.d/wheel_sudo
-        src: /etc/ansible/files/sudoers/wheel_sudo
-        validate: 'visudo -cf %s'
-    - name: Create aur_builder user.
-      become: yes
-      become_user: root
-      become_method: su
-      user:
-        name: aur_builder
-        group: wheel
-    - name: Configure sudoers for aur_builder
-      become: yes
-      become_user: root
-      become_method: su
+    - name: Setup passwordless sudo for my user
       lineinfile:
-        path: /etc/sudoers.d/11-install-aur_builder
-        line: 'aur_builder ALL=(ALL) NOPASSWD: /usr/bin/pacman'
+        path: /etc/sudoers.d/10-alan-nopasswd
+        line: 'alan ALL=(ALL) NOPASSWD: ALL'
         create: yes
         validate: 'visudo -cf %s'
-    - name: Install makepkg dependencies
-      become: yes
-      become_user: root
-      become_method: su
-      package:
-        name: "{{ item }}"
+    - name: Add my user
+      user:
+        name: alan
         state: present
-      with_items:
-        - fakeroot
-        - base-devel
-    - name: ensure the 'yay' aur helper is installed
-      become: yes
-      become_user: aur_builder
-      become_method: sudo
-      aur:
-        name: yay
-        skip_installed: true
-        use: makepkg
+        append: yes
+        groups:
+          - adm
+          - audio
+          - cdrom
+          - dialout
+          - games
+          - gpio
+          - i2c
+          - input
+          - netdev
+          - plugdev
+          - spi
+          - sudo
+          - users
+          - video
+    - name: Add SSH key to my user
+      authorized_key:
+        user: alan
+        state: present
+        key: "{{ lookup('file', '/home/alan/git/ssh_keys/id_personal.pub') }}"
+    - name: Configure kernel params for groups
+      copy: content="console=serial0,115200 console=tty1 root=PARTUUID=6c586e13-02 rootfstype=ext4 elevator=deadline fsck.repair=yes rootwait cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory" dest=/boot/cmdline.txt
+    - name: Kill Pis running processes
+      remote_user: alan
+      shell: kill -9 $(ps -eo pid,user,comm | awk '/pi/ { print $1; }')
+    - name: Remove Pi user
+      remote_user: alan
+      user:
+        name: pi
+        state: absent
+        remove: yes
+    - name: Reboot
+      remote_user: alan
+      reboot:
 
 - hosts: kubernetes
-  remote_user: alarm
+  tags: install
   become: yes
-  become_user: aur_builder
   tasks:
+    - name: Add Docker repo apt-key
+      apt_key:
+        url: https://download.docker.com/linux/raspbian/gpg
+        state: present
+    - name: Install docker repo
+      apt_repository:
+        repo: deb https://download.docker.com/linux/raspbian buster stable
+        state: present
     - name: Ensure kubernetes dependencies are installed
       package:
         name: "{{ item }}"
@@ -74,10 +76,44 @@
         - ebtables
         - ethtool
         - socat
-    - name: Ensure kubernetes is installed
-      aur:
-        name: kubernetes-bin
-        skip_installed: true
+        - runc
+        - iproute2
+        - iptables
+        - docker.io
+        - aptitude
+    - name: Add kubernetes repo apt-key
+      apt_key:
+        url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+        state: present
+    - name: Ensure kubernetes repo is setup
+      apt_repository:
+        repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
+        state: present
+    - name: Install kubernetes components
+      apt:
+        name: [
+          # 'kubeadm=1.6.0-00',
+          # 'kubelet=1.6.0-00',
+          # 'kubectl=1.6.0-00'
+          'kubeadm',
+          'kubelet',
+          'kubectl'
+        ]
+        state: present
+        update_cache: yes
+    - name: Check if swap enabled
+      shell: test "$(swapon -s | wc -l)" -gt "1"
+      args:
+        executable: /bin/bash
+      changed_when: False
+      ignore_errors: yes
+      register: swap_enabled
+    - name: Disable swap
+      shell: |
+        dphys-swapfile swapoff
+        dphys-swapfile uninstall
+        update-rc.d dphys-swapfile remove
+      when: swap_enabled.rc == 0
 
 - hosts: kubernetes
   become: yes
@@ -86,30 +122,129 @@
   - name: Set hostname
     hostname:
       name: "{{ inventory_hostname }}"
-  - name: Ensure docker is installed
-    package:
-      name: docker
-      state: present
   - name: Configure docker to use systemd cgroup driver
     template:
       src: /etc/ansible/templates/docker/docker-daemon-kubernetes.json
       dest: /etc/docker/daemon.json
+  - name: Populate /etc/hosts
+    lineinfile:
+      path: /etc/hosts
+      line: "127.0.0.1       {{ inventory_hostname }}"
   - name: Docker service started and enabled
     service:
       name: docker
-      state: started
+      state: restarted
       enabled: yes
-  - name: kubeadm init k8s master config
-    template:
-      src: /etc/ansible/templates/kubernetes/kubeadm-init-master-config.yml
-      dest: /etc/kubernetes/kubeadm-init-master-config.yml
-    when: inventory_hostname is match("k8s-master-\d*")
-  - name: Ensure kubelet enabled
-    service:
-      name: kubelet
-      enabled: yes
-  - name: kubeadm init k8s masters
-    become: yes
-    become_user: root
-    command: kubeadm init --config /etc/kubernetes/kubeadm-init-master-config.yml
-    when: inventory_hostname is match("k8s-master-\d*")
+  - name: Enable netfilter on bridges
+    block:
+      - sysctl:
+          name: net.bridge.bridge-nf-call-ip6tables
+          value: '1'
+      - sysctl:
+          name: net.bridge.bridge-nf-call-iptables
+          value: '1'
+      - sysctl:
+          name: net.bridge.bridge-nf-call-arptables
+          value: '1'
+
+- hosts: kubernetes_masters
+  become: yes
+  tasks:
+    # - name: Pull kubernetes containers
+    #   command: kubeadm config images pull -v3
+    - name: Initialise Kubernetes master
+      command: kubeadm init --token-ttl=0 --pod-network-cidr=10.244.0.0/16
+      args:
+        creates: /var/lib/kubelet/config.yaml
+    - name: Setup kubeconfig
+      become: no
+      changed_when: False
+      shell: |
+        mkdir -p $HOME/.kube
+        sudo cp /etc/kubernetes/admin.conf $HOME/.kube/config
+        sudo chown $(id -u):$(id -g) $HOME/.kube/config
+    # - name: Download weave script
+    #   become: yes
+    #   get_url:
+    #     url: https://git.io/weave
+    #     dest: /usr/local/bin/weave
+    #     mode: 0555
+    #     state: absent
+    - name: Setup flannel networking
+      become: no
+      shell: |
+        kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+    # - name: Check if weave already setup
+    #   shell: docker ps | grep weave &> /dev/null
+    #   changed_when: False
+    #   register: weave_installed
+    # - name: Setup weavenet
+    #   become: no
+    #   shell: |
+    #     export KUBECONFIG=$HOME/.kube/config
+    #     kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
+    #   when: weave_installed.rc == 1
+    - name: Check if dashboard already setup
+      shell: docker ps | grep dashboard &> /dev/null
+      changed_when: False
+      register: k8s_dashboard_installed
+    - name: Setup Kubernetes dashboard
+      become: no
+      shell: |
+        export KUBECONFIG=$HOME/.kube/config
+        kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v1.10.1/src/deploy/recommended/kubernetes-dashboard.yaml
+      when: k8s_dashboard_installed.rc == 1
+    - name: Get k8s join command
+      shell: kubeadm token create --print-join-command
+      changed_when: False
+      register: k8s_join_command
+
+- hosts: kubernetes_workers
+  become: yes
+  tasks:
+    - name: Check if node has joined
+      shell: test -f /etc/kubernetes/kubelet.conf
+      ignore_errors: yes
+      register: node_joined
+    - name: Join cluster
+      shell: "{{ hostvars['k8s-master-01']['k8s_join_command']['stdout'] }}"
+      when: node_joined.rc == 1
+
+- hosts: kubernetes
+  become: yes
+  tasks:
+    - name: Ensure kubelet is enabled
+      service:
+        name: kubelet
+        enabled: yes
+        state: started
+
+- hosts: kubernetes_workers
+  become: yes
+  tags: [ never, reset ]
+  tasks:
+    - name: Reset kubernetees
+      shell: |
+        kubeadm reset -f
+        weave reset
+        rm -f /opt/cni/bin/weave-*
+    - name: Uninstall kubernetes
+      apt:
+        name: ['kubeadm', 'kubelet', 'kubectl']
+        state: absent
+        purge: yes
+
+- hosts: kubernetes_masters
+  become: yes
+  tags: [ never, reset ]
+  tasks:
+    - name: Reset kubernetees
+      shell: |
+        kubeadm reset -f
+        weave reset
+        rm -f /opt/cni/bin/weave-*
+    - name: Uninstall kubernetes
+      apt:
+        name: ['kubeadm', 'kubelet', 'kubectl']
+        state: absent
+        purge: yes
