@@ -153,7 +153,7 @@
     # - name: Pull kubernetes containers
     #   command: kubeadm config images pull -v3
     - name: Initialise Kubernetes master
-      command: kubeadm init --token-ttl=0 --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=10.244.0.1 --service-cidr=10.244.0.0/16
+      command: kubeadm init --token-ttl=0 --pod-network-cidr=10.244.0.0/16
       args:
         creates: /var/lib/kubelet/config.yaml
     - name: Setup kubeconfig
@@ -226,8 +226,15 @@
     - name: Reset kubernetees
       shell: |
         kubeadm reset -f
-        weave reset
-        rm -f /opt/cni/bin/weave-*
+        #weave reset
+        #rm -f /opt/cni/bin/weave-*
+        ip link del cni0
+        ip link del flannel.1
+        iptables -F
+        iptables -t nat -F
+        iptables -t mangle -F
+        iptables -X
+        systemctl restart networking
     - name: Uninstall kubernetes
       apt:
         name: ['kubeadm', 'kubelet', 'kubectl']
@@ -241,8 +248,15 @@
     - name: Reset kubernetees
       shell: |
         kubeadm reset -f
-        weave reset
-        rm -f /opt/cni/bin/weave-*
+        #weave reset
+        #rm -f /opt/cni/bin/weave-*
+        ip link del cni0
+        ip link del flannel.1
+        iptables -F
+        iptables -t nat -F
+        iptables -t mangle -F
+        iptables -X
+        systemctl restart networking
     - name: Uninstall kubernetes
       apt:
         name: ['kubeadm', 'kubelet', 'kubectl']
