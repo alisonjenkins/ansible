@@ -1,10 +1,16 @@
 ---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: motioneye
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: motioneye-deployment
   labels:
     app: motioneye
+  namespace: motioneye
 spec:
   replicas: 1
   selector:
@@ -28,6 +34,7 @@ metadata:
   name: motioneye
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
+  namespace: motioneye
 spec:
   rules:
   - http:

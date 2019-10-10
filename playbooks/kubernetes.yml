@@ -1,4 +1,60 @@
 ---
+
+- hosts: kubernetes_workers
+  become: yes
+  tags: [ never, reset ]
+  tasks:
+    - name: Reset kubernetees
+      shell: |
+        kubeadm reset -f
+        #weave reset
+        #rm -f /opt/cni/bin/weave-*
+        ip link del cni0
+        ip link del flannel.1
+        ip link del weave
+        iptables -F
+        iptables -t nat -F
+        iptables -t mangle -F
+        iptables -X
+        ipvsadm -C
+        systemctl restart networking
+    - name: Uninstall kubernetes
+      apt:
+        name: ['kubeadm', 'kubelet', 'kubectl']
+        state: absent
+        purge: yes
+    - name: Delete kubernetes configs
+      file:
+        state: absent
+        path: /etc/kubernetes
+
+- hosts: kubernetes_masters
+  become: yes
+  tags: [ never, reset ]
+  tasks:
+    - name: Reset kubernetees
+      shell: |
+        kubeadm reset -f
+        #weave reset
+        #rm -f /opt/cni/bin/weave-*
+        ip link del cni0
+        ip link del flannel.1
+        iptables -F
+        iptables -t nat -F
+        iptables -t mangle -F
+        iptables -X
+        ipvsadm -C
+        systemctl restart networking
+    - name: Uninstall kubernetes
+      apt:
+        name: ['kubeadm', 'kubelet', 'kubectl']
+        state: absent
+        purge: yes
+    - name: Delete kubernetes configs
+      file:
+        state: absent
+        path: /etc/kubernetes
+
 - hosts: kubernetes
   tags: [ never, reboot ]
   become: yes
@@ -247,58 +303,17 @@
         enabled: yes
         state: started
 
-- hosts: kubernetes_workers
-  become: yes
-  tags: [ never, reset ]
-  tasks:
-    - name: Reset kubernetees
-      shell: |
-        kubeadm reset -f
-        #weave reset
-        #rm -f /opt/cni/bin/weave-*
-        ip link del cni0
-        ip link del flannel.1
-        ip link del weave
-        iptables -F
-        iptables -t nat -F
-        iptables -t mangle -F
-        iptables -X
-        ipvsadm -C
-        systemctl restart networking
-    - name: Uninstall kubernetes
-      apt:
-        name: ['kubeadm', 'kubelet', 'kubectl']
-        state: absent
-        purge: yes
-    - name: Delete kubernetes configs
-      file:
-        state: absent
-        path: /etc/kubernetes
-
-
 - hosts: kubernetes_masters
+  tags: [ "applications" ]
   become: yes
-  tags: [ never, reset ]
   tasks:
-    - name: Reset kubernetees
-      shell: |
-        kubeadm reset -f
-        #weave reset
-        #rm -f /opt/cni/bin/weave-*
-        ip link del cni0
-        ip link del flannel.1
-        iptables -F
-        iptables -t nat -F
-        iptables -t mangle -F
-        iptables -X
-        ipvsadm -C
-        systemctl restart networking
-    - name: Uninstall kubernetes
-      apt:
-        name: ['kubeadm', 'kubelet', 'kubectl']
-        state: absent
-        purge: yes
-    - name: Delete kubernetes configs
-      file:
-        state: absent
-        path: /etc/kubernetes
+    - name: Ensure applications are all installed
+      block:
+        - name: Motioneye
+          k8s:
+            state: present
+            definition: "{{lookup('file', '/etc/ansible/files/kubernetes/motioneye/deployment.yaml')}}"
+            kubeconfig: /etc/kubernetes/admin.conf
+            validate:
+              fail_on_error: yes
+              strict: yes
