@@ -1,0 +1,3 @@
+nvram set dhcp_staticlist='list'
+nvram commit
+service restart_dnsmasq

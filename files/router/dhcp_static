@@ -1,0 +1,14 @@
+00:17:88:66:4D:2F 192.168.1.10 philipshuehub
+D0:52:A8:A6:71:4B 192.168.1.11 smartthingshub
+18:B4:30:C9:8B:36 192.168.1.12 nestthermostat
+DC:4F:22:63:12:6F 192.168.1.50 livingroomplug
+40:9F:38:05:B2:2C 192.168.1.13 roomba960
+00:25:90:44:0E:D9 192.168.1.31 tower
+D0:23:DB:4D:79:D7 192.168.1.32 nvidiashield
+A4:77:33:4F:74:4C 192.168.1.33 livingroomgh
+30:FD:38:02:66:82 192.168.1.34 alanbedroomghm
+C4:95:00:F2:67:71 192.168.1.35 officeechop
+B8:27:EB:9C:08:B5 192.168.1.80 k8s-master-01
+B8:27:EB:1B:DE:3D 192.168.1.81 k8s-worker-01
+DC:A6:32:1F:1E:81 192.168.1.82 k8s-worker-02
+DC:A6:32:38:0D:16 192.168.1.83 k8s-worker-03

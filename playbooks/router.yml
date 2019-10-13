@@ -1,0 +1,62 @@
+- name: Setup the router
+  hosts: router
+  gather_facts: false
+  tasks:
+  - name: Generate current list of static dhcp entries
+    register: dhcp_staticlist
+    local_action: command python3 /etc/ansible/files/router/gen_static.py
+    changed_when: False
+
+  - name: Get nvram dhcp_staticlist
+    register: current_dhcp_staticlist
+    raw: nvram get dhcp_staticlist
+
+  - name: Set nvram dhcp_staticlist variable
+    raw: nvram set dhcp_staticlist='{{dhcp_staticlist.stdout}}'
+    when: current_dhcp_staticlist.stdout.find(dhcp_staticlist.stdout) == -1
+    changed_when: True
+    notify:
+    - nvram commit
+    - restart dnsmasq
+
+  - name: Generate current list of port forwards
+    register: port_forwards
+    local_action: command python3 /etc/ansible/files/router/gen_port_forwards.py
+    changed_when: False
+
+  - name: Get nvram vts_rulelist (port forwards)
+    register: current_port_fowards
+    raw: nvram get vts_rulelist
+
+  - name: Set nvram vts_rulelist variable
+    raw: nvram set vts_rulelist='{{port_forwards.stdout}}'
+    when: current_port_fowards.stdout.find(port_forwards.stdout) == -1
+    changed_when: True
+    notify:
+    - nvram commit
+    - restart firewall
+
+  - name: Get md5sum of local dnsmasq.conf.add
+    register: dnsmasqconf_md5
+    local_action: shell md5sum /etc/ansible/files/router/dnsmasq.conf.add | cut -d ' ' -f1
+    changed_when: False
+
+  - name: Get current dnsmasq.conf.add md5sum
+    register: current_dnsmasqconf_md5
+    raw: md5sum /jffs/configs/dnsmasq.conf.add | cut -d ' ' -f1
+
+  - name: Copy dnsmasq.conf.add to the router
+    local_action: command scp /etc/ansible/files/router/dnsmasq.conf.add ajjenkins.asuscomm.com:/jffs/configs/dnsmasq.conf.add
+    when: current_dnsmasqconf_md5.stdout.find(dnsmasqconf_md5.stdout) == -1
+    notify: restart dnsmasq
+
+  handlers:
+  - name: nvram commit
+    raw: nvram commit
+  - name: restart dnsmasq
+    raw: service restart_dnsmasq
+  - name: restart firewall
+    raw: service restart_firewall
+  - name: Reboot router
+    raw: reboot
+# vim: set ft=ansible:

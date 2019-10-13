@@ -1,0 +1,47 @@
+dhcp-option=119,home.alan-jenkins.com
+local=/home.alan-jenkins.com/
+domain=home.alan-jenkins.com
+
+address=/router/router.home.alan-jenkins.com/192.168.1.1
+address=/tower/tower.home.alan-jenkins.com/192.168.1.31
+address=/k8s-master-01/k8s-master-01.home.alan-jenkins.com/192.168.1.80
+address=/k8s-worker-01/k8s-worker-01.home.alan-jenkins.com/192.168.1.81
+address=/k8s-worker-02/k8s-worker-02.home.alan-jenkins.com/192.168.1.82
+address=/k8s-worker-03/k8s-worker-03.home.alan-jenkins.com/192.168.1.83
+
+# lancache - steam
+##address=/lancache-steam/192.168.0.6
+##address=/cs.steampowered.com/192.168.0.6
+##address=/.cs.steampowered.com/192.168.0.6
+##address=/content1.steampowered.com/192.168.0.6
+##address=/content2.steampowered.com/192.168.0.6
+##address=/content3.steampowered.com/192.168.0.6
+##address=/content4.steampowered.com/192.168.0.6
+##address=/content5.steampowered.com/192.168.0.6
+##address=/content6.steampowered.com/192.168.0.6
+##address=/content7.steampowered.com/192.168.0.6
+##address=/content8.steampowered.com/192.168.0.6
+##address=/.hsar.steampowered.com.edgesuite.net/192.168.0.6
+##address=/clientconfig.akamai.steamstatic.com/192.168.0.6
+
+# lancache - riot
+##address=/lancache-riot/192.168.0.6
+##address=/l3cdn.riotgames.com/192.168.0.6
+
+# lancache - blizzard
+##address=/lancache-blizzard/192.168.0.6
+##address=/dist.blizzard.com.edgesuite.net/192.168.0.6
+##address=/llnw.blizzard.com/192.168.0.6
+##address=/dist.blizzard.com/192.168.0.6
+
+# lancache - hirez
+##address=/lancache-hirez/192.168.0.6
+##address=/hirez.http.internapcdn.net/192.168.0.6
+
+# lancache - origin
+##address=/lancache-origin/192.168.0.6
+##address=/akamai.cdn.ea.com/192.168.0.6
+
+# lancache - sony
+##address=/lancache-sony/192.168.0.6
+##address=/pls.patch.station.sony.com/192.168.0.6
