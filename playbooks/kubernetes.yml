@@ -30,7 +30,6 @@
           - gpio
           - i2c
           - input
-          - ipvsadm
           - netdev
           - plugdev
           - spi
@@ -81,10 +80,11 @@
         - ethtool
         - iproute2
         - iptables
+        - ipvsadm
+        - python-pip
+        - python3-pip
         - runc
         - socat
-        - python3-pip
-        - python-pip
     - name: Add kubernetes repo apt-key
       apt_key:
         url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
