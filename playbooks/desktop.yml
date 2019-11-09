@@ -18,6 +18,12 @@
           state: present
           line: 'COMPRESSXZ=(xz -c -z - --threads=0)'
           regexp: '^COMPRESSXZ='
+      - name: configure zst package compression
+        lineinfile:
+          path: /etc/makepkg.conf
+          state: present
+          line: "PKGEXT='.pkg.tar.zst'"
+          regexp: "^PKGEXT="
       - name: set C compiler flags
         lineinfile:
           path: /etc/makepkg.conf
@@ -195,7 +201,6 @@
         with_items:
         # - cloud-print-connector-git
         # - howdy
-        # - lib32-gamemode-git
         # - powershell
         # - swagger-codegen
         # - xboxdrv
@@ -262,11 +267,13 @@
         - keepassx
         - keybase-gui
         - kitty
+        - lib32-gamemode-git
         - lib32-nvidia-utils
         - lib32-vulkan-icd-loader
         - libinput-gestures
         - libreoffice-fresh-en-gb
         - libva-intel-driver
+        - lightdm
         - lnav
         - lshw
         - lutris
@@ -327,8 +334,6 @@
         - ripgrep
         - rofi
         - samba
-        - sddm
-        - sddm-futuristic-theme
         - seahorse
         - shellcheck
         - slack-desktop
@@ -388,10 +393,51 @@
         - zramswap
         become: yes
         become_user: aur_builder
-  - name: Enable sddm service
+  - name: Enable lightdm
     service:
-      name: sddm
-      enabled: yes
+      name: lightdm
+      enabled: true
+  - name: Nvidia Xorg conf
+    template:
+      src: /etc/ansible/templates/nvidia-xorg.conf.j2
+      dest: /etc/X11/xorg.conf
+      owner: root
+      group: root
+      mode: 664
+
+  - name: Configure gamemode
+    template:
+      src: /etc/ansible/templates/gamemode.ini.j2
+      dest: /etc/gamemode.ini
+      owner: root
+      group: root
+      mode: 0644
+
+  - name: Set nvidia TDP - Create timer
+    template:
+      src: /etc/ansible/templates/nvidia-powertarget.timer.j2
+      dest: /etc/systemd/system/nvidia-powertarget.timer
+      owner: root
+      group: root
+      mode: 0644
+    when: nvidia_powertarget_tdp is defined
+
+  - name: Set nvidia TDP - Create Service
+    template:
+      src: /etc/ansible/templates/nvidia-powertarget.service.j2
+      dest: /etc/systemd/system/nvidia-powertarget.service
+      owner: root
+      group: root
+      mode: 0644
+    when: nvidia_powertarget_tdp is defined
+
+  - name: Enable nvidia TDP timer
+    service:
+      name: nvidia-powertarget.timer
+      enabled: true
+    when: nvidia_powertarget_tdp is defined
+
+
   - name: Setup user dotfiles
     block:
       - file:
@@ -451,6 +497,7 @@
       service:
         name: systemd-timesyncd
         state: restarted
+
 
 - hosts: desktops
   tags: sysctl

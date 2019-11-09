@@ -2,7 +2,7 @@
 router ansible_host=192.168.1.1 ansible_user=alan
 
 [desktops]
-localhost ansible_connection=local
+alan-desktop ansible_connection=local gamemode_overclock=true gamemode_overclock_gpu=0 gamemode_overclock_cpu_offset=130 gamemode_overclock_mem_offset=300 nvidia_powertarget_tdp=320
 
 [kubernetes]
 #kube-master-1 ansible_host=192.168.86.25 ansible_user=alarm
