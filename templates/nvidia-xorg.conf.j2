@@ -42,6 +42,19 @@ Section "Screen"
     Device         "Device0"
     Monitor        "Monitor0"
     DefaultDepth    24
+{% if nvidia_xorg_conf_metamodes %}
+    Option         "metamodes" "{{ nvidia_xorg_conf_metamodes }}"
+{% endif %}
+{% if nvidia_xorg_conf_allow_indirect_glx_protocol %}
+    Option         "AllowIndirectGLXProtocol" "{{ nvidia_xorg_conf_allow_indirect_glx_protocol }}"
+{% else %}
+    Option         "AllowIndirectGLXProtocol" "on"
+{% endif %}
+{% if nvidia_xorg_conf_triple_buffer %}
+    Option         "TripleBuffer" "{{ nvidia_xorg_conf_triple_buffer }}"
+{% else %}
+    Option         "TripleBuffer" "off"
+{% endif %}
     Option         "AllowSHMPixmaps" "1"
     Option         "Coolbits" "28"
     SubSection     "Display"

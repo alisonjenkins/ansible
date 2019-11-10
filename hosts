@@ -2,7 +2,7 @@
 router ansible_host=192.168.1.1 ansible_user=alan
 
 [desktops]
-alan-desktop ansible_connection=local gamemode_overclock=true gamemode_overclock_gpu=0 gamemode_overclock_cpu_offset=130 gamemode_overclock_mem_offset=300 nvidia_powertarget_tdp=320
+alan-desktop ansible_connection=local gamemode_overclock=true gamemode_overclock_gpu=0 gamemode_overclock_cpu_offset=130 gamemode_overclock_mem_offset=300 nvidia_powertarget_tdp=320 nvidia_xorg_conf_metamodes="nvidia-auto-select +0+0 {ForceFullCompositionPipeline=On}" nvidia_xorg_conf_allow_indirect_glx_protocol=off nvidia_xorg_conf_triple_buffer=on
 
 [kubernetes]
 #kube-master-1 ansible_host=192.168.86.25 ansible_user=alarm
