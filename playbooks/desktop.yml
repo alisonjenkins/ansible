@@ -5,6 +5,7 @@
   - user:
       name: aur_builder
       group: wheel
+      system: yes
   - lineinfile:
       path: /etc/sudoers.d/11-install-aur_builder
       line: 'aur_builder ALL=(ALL) NOPASSWD: /usr/bin/pacman'
@@ -115,7 +116,6 @@
           - docker
           - git
           - htop
-          - linux-headers
           - moreutils
           - ncdu
           - network-manager-sstp
@@ -195,6 +195,7 @@
           groups: docker,sys,wheel,audio
           append: yes
       - name: Setup desktop packages
+        tags: install_packages
         aur:
           name: "{{ item }}"
           skip_installed: true
@@ -234,6 +235,7 @@
         - dunst
         - dzen2
         - easytag
+        - ethtool
         - evince
         - exa
         - exfat-utils
@@ -363,6 +365,7 @@
         - uhk-agent-appimage
         - unbound
         - unigine-heaven
+        - uvesafb-dkms
         - vagrant
         - virt-manager
         - virtualbox
@@ -377,6 +380,7 @@
         - wireshark-git
         - xclip
         - xorg-fonts-misc
+        - xorg-server-xephyr
         - xorg-server-xwayland
         - xorg-xev
         - xorg-xkill
@@ -393,9 +397,9 @@
         - zramswap
         become: yes
         become_user: aur_builder
-  - name: Enable lightdm
+  - name: Enable lightdm plymouth service
     service:
-      name: lightdm
+      name: lightdm-plymouth
       enabled: true
   - name: Nvidia Xorg conf
     template:
@@ -403,7 +407,31 @@
       dest: /etc/X11/xorg.conf
       owner: root
       group: root
-      mode: 664
+      mode: 0664
+
+  - name: Configure Lightdm
+    template:
+      src: /etc/ansible/templates/lightdm.conf.j2
+      dest: /etc/lightdm/lightdm.conf
+      owner: root
+      group: root
+      mode: 0664
+
+  - name: Create Lightdm Display Setup Script
+    template:
+      src: /etc/ansible/templates/lightdm-display-setup.sh.j2
+      dest: /etc/lightdm/display-setup.sh
+      owner: root
+      group: root
+      mode: 0774
+
+  - name: Configure uvesafb
+    template:
+      src: /etc/ansible/templates/uvesafb.conf.j2
+      dest: /usr/lib/modprobe.d/uvesafb.conf
+      owner: root
+      group: root
+      mode: 0664
 
   - name: Configure gamemode
     template:
@@ -413,30 +441,39 @@
       group: root
       mode: 0644
 
-  - name: Set nvidia TDP - Create timer
+  # - name: Set nvidia TDP - Create timer
+  #   template:
+  #     src: /etc/ansible/templates/nvidia-powertarget.timer.j2
+  #     dest: /etc/systemd/system/nvidia-powertarget.timer
+  #     owner: root
+  #     group: root
+  #     mode: 0644
+  #   when: nvidia_powertarget_tdp is defined
+
+  # - name: Set nvidia TDP - Create Service
+  #   template:
+  #     src: /etc/ansible/templates/nvidia-powertarget.service.j2
+  #     dest: /etc/systemd/system/nvidia-powertarget.service
+  #     owner: root
+  #     group: root
+  #     mode: 0644
+  #   when: nvidia_powertarget_tdp is defined
+
+  # - name: Enable nvidia TDP timer
+  #   service:
+  #     name: nvidia-powertarget.timer
+  #     enabled: true
+  #   when: nvidia_powertarget_tdp is defined
+
+  - name: Create mkinitcpio conf
+    tags: mkinitcpio
     template:
-      src: /etc/ansible/templates/nvidia-powertarget.timer.j2
-      dest: /etc/systemd/system/nvidia-powertarget.timer
+      src: /etc/ansible/templates/mkinitcpio.conf.j2
+      dest: /etc/mkinitcpio.conf
       owner: root
       group: root
       mode: 0644
-    when: nvidia_powertarget_tdp is defined
-
-  - name: Set nvidia TDP - Create Service
-    template:
-      src: /etc/ansible/templates/nvidia-powertarget.service.j2
-      dest: /etc/systemd/system/nvidia-powertarget.service
-      owner: root
-      group: root
-      mode: 0644
-    when: nvidia_powertarget_tdp is defined
-
-  - name: Enable nvidia TDP timer
-    service:
-      name: nvidia-powertarget.timer
-      enabled: true
-    when: nvidia_powertarget_tdp is defined
-
+    notify: create mkinitcpio
 
   - name: Setup user dotfiles
     block:
@@ -497,6 +534,8 @@
       service:
         name: systemd-timesyncd
         state: restarted
+    - name: create mkinitcpio
+      command: mkinitcpio -P
 
 
 - hosts: desktops

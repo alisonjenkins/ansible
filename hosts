@@ -1,32 +1,77 @@
-[router]
-router ansible_host=192.168.1.1 ansible_user=alan
+all:
+  hosts:
 
-[desktops]
-alan-desktop ansible_connection=local gamemode_overclock=true gamemode_overclock_gpu=0 gamemode_overclock_cpu_offset=130 gamemode_overclock_mem_offset=300 nvidia_powertarget_tdp=320 nvidia_xorg_conf_metamodes="nvidia-auto-select +0+0 {ForceFullCompositionPipeline=On}" nvidia_xorg_conf_allow_indirect_glx_protocol=off nvidia_xorg_conf_triple_buffer=on
+    router:
+      ansible_host: 192.168.1.1
+      ansible_user: alan
 
-[kubernetes]
-#kube-master-1 ansible_host=192.168.86.25 ansible_user=alarm
-k8s-master-01 ansible_host=192.168.86.110
-k8s-worker-01 ansible_host=192.168.86.111
-k8s-worker-02 ansible_host=192.168.86.112
-k8s-worker-03 ansible_host=192.168.86.113
+    alan-desktop:
+      ansible_connection: local
+      gamemode_overclock: true
+      gamemode_overclock_gpu: 0
+      gamemode_overclock_cpu_offset: 130
+      gamemode_overclock_mem_offset: 300
+      nvidia_powertarget_tdp: 320
+      nvidia_xorg_conf_metamodes: "DFP-6: 3440x1440_100 +0+0 { ForceFullCompositionPipeline: On }"
+      nvidia_xorg_conf_allow_indirect_glx_protocol: on
+      nvidia_xorg_conf_triple_buffer: off
+      uvesa_fb_resolution: 3440x1440-32
+      mkinitcpio_hooks:
+        - base
+        - udev
+        - v86d
+        - autodetect
+        - modconf
+        - block
+        - keyboard
+        - keymap
+        #- encrypt
+        - plymouth
+        - plymouth-encrypt
+        - lvm2
+        - resume
+        - filesystems
+        - keyboard
+        - fsck
 
-[kubernetes_masters]
-k8s-master-01
+    k8s-master-01:
+      ansible_host: 192.168.1.80
 
-[kubernetes_workers]
-k8s-worker-01
-k8s-worker-02
-k8s-worker-03
+    k8s-worker-01:
+      ansible_host: 192.168.1.81
 
-[py3hosts]
-k8s-master-01
-k8s-worker-01
-k8s-worker-02
-k8s-worker-03
+    k8s-worker-02:
+      ansible_host: 192.168.1.82
 
-[py3hosts:vars]
-ansible_python_interpreter=/usr/bin/python3
+    k8s-worker-03:
+      ansible_host: 192.168.1.83
 
-[kubernetes:vars]
-ansible_password=raspberry
+  children:
+    router:
+      hosts:
+        router
+
+    desktops:
+      hosts:
+        alan-desktop
+
+    kubernetes:
+      hosts:
+        k8s-master-01
+        k8s-worker-01
+        k8s-worker-02
+        k8s-worker-03
+      vars:
+        ansible_password: raspberry
+
+    kubernetes_masters:
+      hosts:
+        k8s-master-01
+
+    kubernetes_workers:
+      hosts:
+        k8s-worker-01
+        k8s-worker-02
+        k8s-worker-03
+
+# vim: set ft=yaml:

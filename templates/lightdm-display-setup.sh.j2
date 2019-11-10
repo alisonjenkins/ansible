@@ -1,0 +1,2 @@
+#!/bin/bash
+{% if nvidia_powertarget_tdp is defined %}test -e /usr/bin/nvidia-smi && nvidia-smi -pl {{ nvidia_powertarget_tdp }}{% endif %}
