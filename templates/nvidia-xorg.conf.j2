@@ -28,7 +28,11 @@ Section "Monitor"
     Identifier     "Monitor0"
     VendorName     "Unknown"
     ModelName      "Unknown"
-    Option         "DPMS"
+    Option         "DPMS"        "{% if nvidia_xorg_conf_dpms_enabled is defined %}{{ nvidia_xorg_conf_dpms_enabled }}{% else %}true{% endif %}"
+    Option         "StandbyTime" "{% if nvidia_xorg_conf_dpms_standby_time is defined %}{{ nvidia_xorg_conf_dpms_standby_time }}{% else %}10{% endif %}"
+    Option         "SuspendTime" "{% if nvidia_xorg_conf_dpms_suspend_time is defined %}{{ nvidia_xorg_conf_dpms_suspend_time }}{% else %}20{% endif %}"
+    Option         "OffTime"     "{% if nvidia_xorg_conf_dpms_off_time is defined %}{{ nvidia_xorg_conf_dpms_off_time }}{% else %}30{% endif %}"
+    Option         "BlankTime"   "{% if nvidia_xorg_conf_dpms_blank_time is defined %}{{ nvidia_xorg_conf_dpms_off_time }}{% else %}30{% endif %}"
 EndSection
 
 Section "Device"

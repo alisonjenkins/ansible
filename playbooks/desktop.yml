@@ -111,30 +111,54 @@
           name: "{{ item }}"
           state: present
         with_items:
+          # - network-manager-sstp
+          # - networkmanager
+          # - networkmanager-openconnect
+          # - networkmanager-openvpn
+          # - networkmanager-pptp
+          # - networkmanager-vpnc
+          # - nm-connection-editor
           - augeas
           - bash-completion
+          - bluez
+          - connman
           - docker
           - git
           - htop
+          - iwd
           - moreutils
           - ncdu
-          - network-manager-sstp
-          - networkmanager
-          - networkmanager-openconnect
-          - networkmanager-openvpn
-          - networkmanager-pptp
-          - networkmanager-vpnc
-          - nm-connection-editor
+          - openvpn
           - pkgfile
           - python-pip
           - python2-pip
           - ranger
           - rsync
           - tmux
-      - name: Enable network manager
+      - name: Create connman config dir
+        file:
+          path: /etc/connman
+          state: directory
+          owner: root
+          group: root
+
+      - name: Configure connman
+        template:
+          src: /etc/ansible/templates/connman-main.conf.j2
+          dest: /etc/connman/main.conf
+          owner: root
+          group: root
+          mode: 0664
+        notify: Restart connman
+
+      - name: Enable connman
         service:
-          name: NetworkManager
+          name: connman
           enabled: true
+      # - name: Enable network manager
+      #   service:
+      #     name: NetworkManager
+      #     enabled: true
       - name: Generate initial pkgfile db
         command: /usr/bin/pkgfile -u
         args:
@@ -205,6 +229,7 @@
         # - powershell
         # - swagger-codegen
         # - xboxdrv
+        # - network-manager-applet
         - appimage-git
         - arandr
         - aria2
@@ -225,12 +250,16 @@
         - clight
         - cmus
         - compton
+        - connman-gtk
+        - connman-ncurses
+        - connman_dmenu-git
         - ctags
         - deluge
         - direnv
         - discord
         - dmenu
         - dmidecode
+        - dnsmasq
         - docker-compose
         - dunst
         - dzen2
@@ -295,7 +324,6 @@
         - nemo-terminal
         - neovim
         - nethogs
-        - network-manager-applet
         - nmap
         - npm
         - nvidia-dkms
@@ -313,6 +341,7 @@
         - ovmf
         - p7zip
         - packer
+        - pacman-contrib
         - pass
         - pavucontrol
         - pidgin
@@ -409,6 +438,15 @@
       group: root
       mode: 0664
 
+  # - name: NetworkManager DNS caching
+  #   template:
+  #     src: /etc/ansible/templates/NetworkManager-dns.conf.j2
+  #     dest: /etc/NetworkManager/conf.d/dns.conf
+  #     owner: root
+  #     group: root
+  #     mode: 0664
+  #   notify: NetworkManager restart
+
   - name: Configure Lightdm
     template:
       src: /etc/ansible/templates/lightdm.conf.j2
@@ -423,7 +461,7 @@
       dest: /etc/lightdm/display-setup.sh
       owner: root
       group: root
-      mode: 0774
+      mode: 0775
 
   - name: Configure uvesafb
     template:
@@ -530,12 +568,20 @@
           dest: /home/alan/git/dotfiles
           repo: https://gitlab.com/alanjjenkins/dotfiles.git
   handlers:
+    - name: Restart connman
+      service:
+        name: connman
+        state: restarted
     - name: reload systemd-timesyncd
       service:
         name: systemd-timesyncd
         state: restarted
     - name: create mkinitcpio
       command: mkinitcpio -P
+    # - name: NetworkManager restart
+    #   service:
+    #     name: NetworkManager
+    #     state: restarted
 
 
 - hosts: desktops

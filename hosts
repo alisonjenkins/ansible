@@ -9,12 +9,17 @@ all:
       ansible_connection: local
       gamemode_overclock: true
       gamemode_overclock_gpu: 0
-      gamemode_overclock_cpu_offset: 130
-      gamemode_overclock_mem_offset: 300
+      gamemode_overclock_cpu_offset: 115
+      gamemode_overclock_mem_offset: 250
       nvidia_powertarget_tdp: 320
       nvidia_xorg_conf_metamodes: "DFP-6: 3440x1440_100 +0+0 { ForceFullCompositionPipeline: On }"
       nvidia_xorg_conf_allow_indirect_glx_protocol: on
       nvidia_xorg_conf_triple_buffer: off
+      nvidia_xorg_dpms_enabled: true
+      nvidia_xorg_dpms_standby_time: 10
+      nvidia_xorg_dpms_suspend_time: 20
+      nvidia_xorg_dpms_off_time: 30
+      nvidia_xorg_dpms_blank_time: 30
       uvesa_fb_resolution: 3440x1440-32
       mkinitcpio_hooks:
         - base
