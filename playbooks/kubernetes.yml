@@ -278,6 +278,14 @@
         validate:
           fail_on_error: yes
           strict: yes
+    - name: Setup MetalLB
+      k8s:
+        state: present
+        definition: "{{lookup('file', '/etc/ansible/files/kubernetes/metallb/metallb.yaml')}}"
+        kubeconfig: /etc/kubernetes/admin.conf
+        validate:
+          fail_on_error: yes
+          strict: yes
     - name: Get k8s join command
       shell: kubeadm token create --print-join-command
       changed_when: False
