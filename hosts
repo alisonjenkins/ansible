@@ -39,6 +39,11 @@ all:
         - keyboard
         - fsck
 
+    alan-laptop:
+      ansible_connection: local
+      is_laptop: true
+      gamemode_overclock: false
+
     k8s-master-01:
       ansible_host: 192.168.1.80
 
@@ -58,7 +63,8 @@ all:
 
     desktops:
       hosts:
-        alan-desktop
+        alan-desktop:
+        alan-laptop:
 
     kubernetes:
       hosts:

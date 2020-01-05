@@ -89,7 +89,7 @@
     become_user: aur_builder
   - name: make sure that vim is installed
     package:
-      name: vim
+      name: gvim
       state: present
 
   - name: Install base system
@@ -121,7 +121,6 @@
           - augeas
           - bash-completion
           - bluez
-          - connman
           - docker
           - git
           - htop
@@ -135,12 +134,22 @@
           - ranger
           - rsync
           - tmux
+
+      - name: Install connman
+        package:
+          name: "{{ item }}"
+          state: present
+        with_items:
+          - connman
+        when: use_connman is defined
+
       - name: Create connman config dir
         file:
           path: /etc/connman
           state: directory
           owner: root
           group: root
+        when: use_connman is defined
 
       - name: Configure connman
         template:
@@ -150,11 +159,13 @@
           group: root
           mode: 0664
         notify: Restart connman
+        when: use_connman is defined
 
       - name: Enable connman
         service:
           name: connman
           enabled: true
+        when: use_connman is defined
       # - name: Enable network manager
       #   service:
       #     name: NetworkManager
@@ -218,6 +229,16 @@
           comment: "Alan Jenkins"
           groups: docker,sys,wheel,audio
           append: yes
+      - name: Install connman aur packages
+        aur:
+          name: "{{ item }}"
+          skip_installed: true
+        with_items:
+          - connman-gtk
+          - connman-ncurses
+          - connman_dmenu-git
+        when: use_connman is defined
+
       - name: Setup desktop packages
         tags: install_packages
         aur:
@@ -241,18 +262,13 @@
         - bind-tools
         - blueman
         - bluez
-        - brave-bin
         - bzip2
-        - cbatticon
         - chromium
         - chromium-widevine
         - cksfv
         - clight
         - cmus
         - compton
-        - connman-gtk
-        - connman-ncurses
-        - connman_dmenu-git
         - ctags
         - deluge
         - direnv
@@ -304,7 +320,7 @@
         - libinput-gestures
         - libreoffice-fresh-en-gb
         - libva-intel-driver
-        - lightdm
+        - sddm
         - lnav
         - lshw
         - lutris
@@ -426,9 +442,9 @@
         - zramswap
         become: yes
         become_user: aur_builder
-  - name: Enable lightdm plymouth service
+  - name: Enable sddm plymouth service
     service:
-      name: lightdm-plymouth
+      name: sddm-plymouth
       enabled: true
   - name: Nvidia Xorg conf
     template:
@@ -437,6 +453,7 @@
       owner: root
       group: root
       mode: 0664
+    when: is_laptop is not defined
 
   # - name: NetworkManager DNS caching
   #   template:
@@ -447,21 +464,21 @@
   #     mode: 0664
   #   notify: NetworkManager restart
 
-  - name: Configure Lightdm
-    template:
-      src: /etc/ansible/templates/lightdm.conf.j2
-      dest: /etc/lightdm/lightdm.conf
-      owner: root
-      group: root
-      mode: 0664
+  # - name: Configure Lightdm
+  #   template:
+  #     src: /etc/ansible/templates/lightdm.conf.j2
+  #     dest: /etc/lightdm/lightdm.conf
+  #     owner: root
+  #     group: root
+  #     mode: 0664
 
-  - name: Create Lightdm Display Setup Script
-    template:
-      src: /etc/ansible/templates/lightdm-display-setup.sh.j2
-      dest: /etc/lightdm/display-setup.sh
-      owner: root
-      group: root
-      mode: 0775
+  # - name: Create Lightdm Display Setup Script
+  #   template:
+  #     src: /etc/ansible/templates/lightdm-display-setup.sh.j2
+  #     dest: /etc/lightdm/display-setup.sh
+  #     owner: root
+  #     group: root
+  #     mode: 0775
 
   - name: Configure uvesafb
     template:
@@ -546,9 +563,13 @@
           chdir: /home/alan/git/dotfiles/dotsync/bin/
         become: yes
         become_user: alan
+      - name: Get uid of alan user
+        become: false
+        local_action: command id -u alan
+        register: alan_uid
       - file:
           state: link
-          src: /run/user/1001/keybase/kbfs/private/ajenkins/ssh_keys
+          src: "/run/user/{{ alan_uid.stdout }}/keybase/kbfs/private/ajenkins/ssh_keys"
           path: /home/alan/git/ssh_keys
           force: yes
           mode: 0700
@@ -562,16 +583,17 @@
           mode: 0700
           owner: alan
           group: alan
-      - git:
-          accept_hostkey: yes
-          depth: 1
-          dest: /home/alan/git/dotfiles
-          repo: https://gitlab.com/alanjjenkins/dotfiles.git
+      # - git:
+      #     accept_hostkey: yes
+      #     depth: 1
+      #     dest: /home/alan/git/dotfiles
+      #     repo: https://gitlab.com/alanjjenkins/dotfiles.git
   handlers:
     - name: Restart connman
       service:
         name: connman
         state: restarted
+      when: use_connman is defined
     - name: reload systemd-timesyncd
       service:
         name: systemd-timesyncd
