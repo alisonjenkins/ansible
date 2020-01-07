@@ -292,7 +292,6 @@
         - gamemode-git
         - geekbench
         - gimp
-        - git-credential-gnome-keyring
         - gitahead-bin
         - go
         - graphviz
@@ -392,8 +391,6 @@
         - stressapptest
         - swagger-editor-git
         - sway-git
-        - swayidle-git
-        - swaylock-git
         - sxiv
         - task
         - tflint

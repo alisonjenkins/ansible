@@ -30,7 +30,6 @@ all:
         - block
         - keyboard
         - keymap
-        #- encrypt
         - plymouth
         - plymouth-encrypt
         - lvm2
@@ -43,6 +42,23 @@ all:
       ansible_connection: local
       is_laptop: true
       gamemode_overclock: false
+      uvesa_fb_resolution: 1920x1080-32
+      mkinitcpio_hooks:
+        - base
+        - udev
+        - v86d
+        - autodetect
+        - modconf
+        - block
+        - keyboard
+        - keymap
+        - plymouth
+        - plymouth-encrypt
+        - lvm2
+        - resume
+        - filesystems
+        - keyboard
+        - fsck
 
     k8s-master-01:
       ansible_host: 192.168.1.80
