@@ -39,10 +39,15 @@ all:
         - fsck
 
     alan-laptop:
+      global_environment_variables:
+        - export VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/intel_icd.x86_64.json:/usr/share/vulkan/icd.d/primus_vk_wrapper.json:/usr/share/vulkan/icd.d/nvidia_icd.json
       ansible_connection: local
       is_laptop: true
       gamemode_overclock: false
       uvesa_fb_resolution: 1920x1080-32
+      mkinitcpio_modules:
+        - intel_agp
+        - i915
       mkinitcpio_hooks:
         - base
         - udev

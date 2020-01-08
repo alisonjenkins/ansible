@@ -1,0 +1,5 @@
+{% if global_environment_variables is defined %}
+{% for variable in global_environment_variables %}
+{{ variable }}
+{% endfor %}
+{% endif %}

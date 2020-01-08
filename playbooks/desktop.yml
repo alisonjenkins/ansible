@@ -277,7 +277,6 @@
         - chromium
         - chromium-widevine
         - cksfv
-        - clight
         - cmus
         - compton
         - ctags
@@ -452,6 +451,15 @@
       group: root
       mode: 0664
     when: is_laptop is not defined
+
+  - name: Set global environment variables in /etc/environment
+    template:
+      src: /etc/ansible/templates/environment.sh.j2
+      dest: /etc/environment
+      owner: root
+      group: root
+      mode: 0664
+    when: global_environment_variables is defined
 
   # - name: NetworkManager DNS caching
   #   template:
