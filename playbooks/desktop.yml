@@ -134,6 +134,17 @@
           - ranger
           - rsync
           - tmux
+          - ufw
+
+      - name: Enable UFW
+        service:
+          name: ufw
+          enabled: true
+          state: restarted
+
+      - name: Set deny as default ufw policy
+        become: false
+        local_action: command ufw default deny
 
       - name: Install connman
         package:
@@ -279,13 +290,11 @@
         - docker-compose
         - dunst
         - dzen2
-        - easytag
         - ethtool
         - evince
         - exa
         - exfat-utils
         - feh
-        - file-roller
         - firefox
         - fortune-mod
         - freemind
@@ -301,7 +310,6 @@
         - i3blocks-contrib-git
         - i3lock
         - i3status
-        - inetutils
         - inkscape
         - intel-ucode
         - iotop
@@ -319,7 +327,6 @@
         - libinput-gestures
         - libreoffice-fresh-en-gb
         - libva-intel-driver
-        - sddm
         - lnav
         - lshw
         - lutris
@@ -329,14 +336,6 @@
         - mutt-wizard-git
         - nbtexplorer
         - ncdu
-        - nemo
-        - nemo-fileroller
-        - nemo-image-converter
-        - nemo-preview
-        - nemo-python
-        - nemo-seahorse
-        - nemo-share
-        - nemo-terminal
         - neovim
         - nethogs
         - nmap
@@ -378,8 +377,10 @@
         - qterminal
         - reflector
         - ripgrep
+        - rng-tools
         - rofi
         - samba
+        - sddm
         - seahorse
         - shellcheck
         - slack-desktop
@@ -493,6 +494,11 @@
       group: root
       mode: 0644
 
+  - name: Enable rngd
+    service:
+      name: rngd
+      enabled: true
+
   # - name: Set nvidia TDP - Create timer
   #   template:
   #     src: /etc/ansible/templates/nvidia-powertarget.timer.j2
@@ -574,7 +580,7 @@
           group: alan
       - file:
           state: link
-          src: /run/user/1001/keybase/kbfs/private/ajenkins/pass-password-store
+          src: "/run/user/{{ alan_uid.stdout }}/keybase/kbfs/private/ajenkins/pass-password-store"
           path: /home/alan/.password-store
           force: yes
           mode: 0700

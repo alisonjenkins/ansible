@@ -46,7 +46,6 @@ all:
       mkinitcpio_hooks:
         - base
         - udev
-        - v86d
         - autodetect
         - modconf
         - block
