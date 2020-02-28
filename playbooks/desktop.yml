@@ -748,6 +748,9 @@
   - name: Virtual memory tuning
     block:
       - sysctl:
+          name: vm.swappiness
+          value: '10'
+      - sysctl:
           name: vm.dirty_ratio
           value: '10'
       - sysctl:
