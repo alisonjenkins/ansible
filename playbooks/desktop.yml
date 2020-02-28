@@ -59,13 +59,6 @@
         package:
           name: aria2
           state: present
-      # - name: setup parallel downloads for pacman
-      #   ini_file:
-      #     path: /etc/pacman.conf
-      #     state: present
-      #     section: options
-      #     option: XferCommand
-      #     value: '/usr/bin/aria2c --allow-overwrite=true --continue=true --file-allocation=none --log-level=error --max-tries=2 --max-connection-per-server=2 --max-file-not-found=5 --min-split-size=5M --no-conf --remote-time=true --summary-interval=60 --timeout=5 --dir=/ --out %o %u'
       - name: ensure ccache is installed
         package:
           name: ccache
@@ -78,7 +71,6 @@
               block: |
                 [multilib]
                 Include = /etc/pacman.d/mirrorlist
-          - command: pacman -Sy
 
   - name: ensure the 'yay' aur helper is installed
     aur:
@@ -111,13 +103,6 @@
           name: "{{ item }}"
           state: present
         with_items:
-          # - network-manager-sstp
-          # - networkmanager
-          # - networkmanager-openconnect
-          # - networkmanager-openvpn
-          # - networkmanager-pptp
-          # - networkmanager-vpnc
-          # - nm-connection-editor
           - augeas
           - bash-completion
           - bluez
@@ -177,10 +162,30 @@
           name: connman
           enabled: true
         when: use_connman is defined
-      # - name: Enable network manager
-      #   service:
-      #     name: NetworkManager
-      #     enabled: true
+
+      - name: Install NetworkManager
+        aur:
+          name: "{{ item }}"
+          skip_installed: true
+        become: yes
+        become_user: aur_builder
+        with_items:
+          - network-manager-sstp
+          - networkmanager
+          - networkmanager-openconnect
+          - networkmanager-openvpn
+          - networkmanager-pptp
+          - networkmanager-vpnc
+          - nm-connection-editor
+          - network-manager-applet
+        when: use_network_manager is defined
+
+      - name: Enable network manager
+        service:
+          name: NetworkManager
+          enabled: true
+        when: use_network_manager is defined
+
       - name: Generate initial pkgfile db
         command: /usr/bin/pkgfile -u
         args:
@@ -244,6 +249,8 @@
         aur:
           name: "{{ item }}"
           skip_installed: true
+        become: yes
+        become_user: aur_builder
         with_items:
           - connman-gtk
           - connman-ncurses
@@ -258,10 +265,8 @@
         with_items:
         # - cloud-print-connector-git
         # - howdy
-        # - powershell
         # - swagger-codegen
         # - xboxdrv
-        # - network-manager-applet
         - appimage-git
         - arandr
         - aria2
@@ -274,6 +279,7 @@
         - blueman
         - bluez
         - bzip2
+        - chezmoi
         - chromium
         - chromium-widevine
         - cksfv
@@ -329,10 +335,10 @@
         - lnav
         - lshw
         - lutris
+        - mailwizard-git
         - mariadb-clients
         - mpv
         - multimc-git
-        - mutt-wizard-git
         - nbtexplorer
         - ncdu
         - neovim
@@ -367,6 +373,7 @@
         - polybar
         - postman-bin
         - powerline-fonts
+        - powershell
         - pulseaudio-modules-bt-git
         - pv
         - pwgen
@@ -470,22 +477,6 @@
   #     mode: 0664
   #   notify: NetworkManager restart
 
-  # - name: Configure Lightdm
-  #   template:
-  #     src: /etc/ansible/templates/lightdm.conf.j2
-  #     dest: /etc/lightdm/lightdm.conf
-  #     owner: root
-  #     group: root
-  #     mode: 0664
-
-  # - name: Create Lightdm Display Setup Script
-  #   template:
-  #     src: /etc/ansible/templates/lightdm-display-setup.sh.j2
-  #     dest: /etc/lightdm/display-setup.sh
-  #     owner: root
-  #     group: root
-  #     mode: 0775
-
   - name: Configure uvesafb
     template:
       src: /etc/ansible/templates/uvesafb.conf.j2
@@ -545,33 +536,13 @@
     block:
       - file:
           state: directory
-          path: /home/alan/git
-          mode: 0700
-          owner: alan
-          group: alan
-      - file:
-          state: directory
-          path: /home/alan/.config
-          mode: 0700
-          owner: alan
-          group: alan
-      - file:
-          state: directory
           path: /home/alan/.gnupg
           mode: 0700
           owner: alan
           group: alan
         become: yes
         become_user: alan
-      - file:
-          state: link
-          src: /home/alan/git/dotfiles/dotsyncrc
-          path: /home/alan/.dotsyncrc
-          owner: alan
-          group: alan
-      - command: ./dotsync -L
-        args:
-          chdir: /home/alan/git/dotfiles/dotsync/bin/
+      - command: "chezmoi init {{ dotfiles_repo }}"
         become: yes
         become_user: alan
       - name: Get uid of alan user
@@ -611,10 +582,10 @@
         state: restarted
     - name: create mkinitcpio
       command: mkinitcpio -P
-    # - name: NetworkManager restart
-    #   service:
-    #     name: NetworkManager
-    #     state: restarted
+    - name: NetworkManager restart
+      service:
+        name: NetworkManager
+        state: restarted
 
 
 - hosts: desktops

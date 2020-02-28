@@ -41,6 +41,7 @@ all:
     alan-laptop:
       global_environment_variables:
         - export VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/intel_icd.x86_64.json:/usr/share/vulkan/icd.d/primus_vk_wrapper.json:/usr/share/vulkan/icd.d/nvidia_icd.json
+      dotfiles_repo: git@gitlab.com:alanjjenkins/chezmoi-dotfiles.git
       ansible_connection: local
       is_laptop: true
       gamemode_overclock: false
@@ -63,6 +64,7 @@ all:
         - filesystems
         - keyboard
         - fsck
+      use_network_manager: true
 
     k8s-master-01:
       ansible_host: 192.168.1.80
