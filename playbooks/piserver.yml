@@ -1,0 +1,468 @@
+- hosts: piserver # {{{
+  remote_user: pi
+  become: yes
+  tags: [ never, init ]
+  tasks:
+    - name: Setup passwordless sudo for my user
+      lineinfile:
+        path: /etc/sudoers.d/10-alan-nopasswd
+        line: 'alan ALL=(ALL) NOPASSWD: ALL'
+        create: yes
+        validate: 'visudo -cf %s'
+    - name: Add my user
+      user:
+        name: alan
+        state: present
+        append: yes
+        groups:
+          - adm
+          - audio
+          - cdrom
+          - dialout
+          - games
+          - gpio
+          - i2c
+          - input
+          - netdev
+          - plugdev
+          - spi
+          - sudo
+          - users
+          - video
+    - name: Add SSH key to my user
+      authorized_key:
+        user: alan
+        state: present
+        key: "{{ lookup('file', '/home/alan/git/ssh_keys/id_personal.pub') }}"
+    - name: Kill Pis running processes
+      remote_user: alan
+      shell: kill -9 $(ps -eo pid,user,comm | awk '/pi/ { print $1; }')
+    - name: Remove Pi user
+      remote_user: alan
+      user:
+        name: pi
+        state: absent
+        remove: yes # }}}
+
+- name: Install podman # {{{
+  hosts: piserver
+  become: yes
+  tasks:
+    - name: Add podman repo key
+      apt_key:
+        url: 'https://download.opensuse.org/repositories/devel:kubic:libcontainers:stable/Debian_10/Release.key'
+        state: present
+    - name: Install podman repo
+      apt_repository:
+        repo: 'deb http://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/Debian_10/ /'
+        state: present
+        update_cache: yes
+    - name: Install podman
+      apt:
+        name: podman
+        state: present # }}}
+
+- name: Install wireguard # {{{
+  hosts: piserver
+  become: yes
+  tags: wireguard_install
+  tasks:
+    - name: Ensure kernel headers are installed
+      apt:
+        name: raspberrypi-kernel-headers
+        state: present
+    - name: Add Debian unstable archive key
+      apt_key:
+        url: "https://ftp-master.debian.org/keys/archive-key-{{ ansible_distribution_major_version }}.asc"
+        state: present
+    - name: Ensure debian unstable repo is enabled
+      apt_repository:
+        repo: 'deb http://deb.debian.org/debian/ unstable main'
+        state: present
+        update_cache: yes
+    - name: Ensure dirmngr is present
+      apt:
+        name: dirmngr
+        state: present
+    - name: Install jq
+      apt:
+        name: jq
+        state: present
+    - name: Install wireguard
+      apt:
+        name: wireguard
+        state: present
+    - name: Ensure net.ipv4.ip_forward is set
+      sysctl:
+        name: net.ipv4.ip_forward
+        value: '1'
+        state: present
+        sysctl_set: yes
+    - name: Ensure git is installed
+      apt:
+        name: git
+        state: present
+    - name: Ensure qrencode is installed
+      apt:
+        name: qrencode
+        state: present # }}}
+
+- name: Wireguard config # {{{
+  hosts: piserver
+  become: yes
+  tags: wireguard_config
+  tasks:
+    - name: Check if wireguard server key exists
+      stat:
+        path: /etc/wireguard/server.key
+      register: wg_server_key
+    - name: Wireguard private key
+      when: wg_server_key.stat.exists == false
+      block:
+        - name: Generate the key
+          shell: wg genkey
+          register: wg_server_private_key
+        - name: Write the key to the key file
+          copy:
+            content: "{{ wg_server_private_key.stdout }}"
+            dest: /etc/wireguard/server.key
+            owner: root
+            group: root
+            mode: '0440'
+    - name: Check if wireguard server config exists
+      stat:
+        path: /etc/wireguard/wg-server.conf
+      register: wg_server_config
+    - name: Configure wireguard interface
+      when: wg_server_config.stat.exists == false
+      block:
+        - name: Create interface
+          command: ip link add dev wg-server type wireguard
+        - name: Configure ip address range for wg-server
+          command: ip addr add 10.242.0.0/24 dev wg-server
+        - name: Configure WG server private key for the interface
+          command: wg set wg-server listen-port 51871 private-key /etc/wireguard/server.key
+        - name: Bring up wg-server interface
+          command: ip link set wg-server up
+        - name: Preserve wg-server config
+          command: wg showconf wg-server
+          register: wg_server_config_output
+        - name: Save wg-server config
+          copy:
+            content: "{{ wg_server_config_output.stdout }}"
+            dest: /etc/wireguard/wg-server.conf
+
+# }}}
+
+- name: Configure firewall # {{{
+  hosts: piserver
+  become: yes
+  tags: [firewall, ufw]
+  tasks:
+    - name: Install ufw
+      apt:
+        name: ufw
+        state: present
+    - name: Allow SSH from internal network
+      ufw:
+        rule: allow
+        to_port: '22'
+        src: 192.168.86.0/24
+    - name: Allow SSH from loopback network
+      ufw:
+        rule: allow
+        to_port: '22'
+        src: 127.0.0.0/8
+    - name: Allow deluge port from internal network
+      ufw:
+        rule: allow
+        to_port: '8112'
+        src: 192.168.86.0/24
+    - name: Allow deluge port from loopback network
+      ufw:
+        rule: allow
+        to_port: '8112'
+        src: 127.0.0.0/8
+    - name: Allow deluge port from loopback network
+      ufw:
+        rule: allow
+        to_port: '8112'
+        src: 127.0.0.0/8
+    - name: Allow deluge incoming ports on VPN interface
+      ufw:
+        rule: allow
+        to_port: '6881:6891'
+        interface: azirevpn-nl1
+        from_ip: 0.0.0.0/0
+        direction: in
+        proto: tcp
+    - name: Add Plex application rule file
+      copy:
+        content: |
+          [plexmediaserver]
+          title=Plex Media Server (Standard)
+          description=The Plex Media Server
+          ports=32400/tcp|3005/tcp|5353/udp|8324/tcp|32410:32414/udp
+
+          [plexmediaserver-dlna]
+          title=Plex Media Server (DLNA)
+          description=The Plex Media Server (additional DLNA capability only)
+          ports=1900/udp|32469/tcp
+
+          [plexmediaserver-all]
+          title=Plex Media Server (Standard + DLNA)
+          description=The Plex Media Server (with additional DLNA capability)
+          ports=32400/tcp|3005/tcp|5353/udp|8324/tcp|32410:32414/udp|1900/udp|32469/tcp
+        dest: /etc/ufw/applications.d/plexmediaserver
+    - name: Reload Plex application rule
+      command: ufw app update plexmediaserver
+    - name: Allow Plex
+      ufw:
+        rule: allow
+        name: plexmediaserver-all
+# }}}
+
+# - name: Setup NFS{{{
+#   hosts: piserver
+#   become: yes
+#   tags: nfs
+#   tasks:
+#     - name: Install NFS
+#       apt:
+#         name: nfs-kernel-server
+#         state: present
+#     - name: Create NFS directories
+#       file:
+#         path: "{{ item }}"
+#         state: directory
+#         owner: root
+#         group: root
+#         mode: '0777'
+#       with_items:
+#         - /srv/nfs
+#         - /srv/nfs/downloads
+#         - /srv/nfs/media
+#         - /srv/nfs/media/anime
+#         - /srv/nfs/media/movies
+#         - /srv/nfs/media/tv
+#         - /srv/nfs/games
+#         - /srv/nfs/backups
+    # - name: Setup exports
+    #   copy:
+    #     content: |
+    #       /srv/nfs           192.168.86.0/24(rw,fsid=0,insecure,insecure_locks,no_subtree_check,async,all_squash,anonuid=1000,anongid=1000)
+    #       /srv/nfs/downloads 192.168.86.0/24(rw,nohide,insecure,insecure_locks,no_subtree_check,async,all_squash,anonuid=1000,anongid=1000)
+    #       /srv/nfs/media     192.168.86.0/24(rw,nohide,insecure,insecure_locks,no_subtree_check,async,all_squash,anonuid=1000,anongid=1000)
+    #       /srv/nfs/games     192.168.86.0/24(rw,nohide,insecure,insecure_locks,no_subtree_check,async,all_squash,anonuid=1000,anongid=1000)
+    #       /srv/nfs/backups   192.168.86.3/32(rw,nohide,insecure,insecure_locks,no_subtree_check,async,all_squash,anonuid=1000,anongid=1000)
+    #     dest: /etc/exports
+    #     owner: root
+    #     group: root
+    #     mode: '0444'
+    # - name: Start nfs-kernel-server
+    #   service:
+    #     name: nfs-kernel-server
+    #     state: started
+    #     enabled: true
+    # - name: Mount storage drive
+    #   mount:
+    #     state: mounted
+    #     fstype: ext4
+    #     src: /dev/sda1
+    #     path: /mnt/storage
+    # - name: Setup bind mounts
+    #   block:
+    #     - mount:
+    #         state: mounted
+    #         fstype: none
+    #         src: /mnt/storage/downloads
+    #         path: /srv/nfs/downloads
+    #         opts: bind
+    #     - mount:
+    #         state: mounted
+    #         fstype: none
+    #         src: /mnt/storage/backups
+    #         path: /srv/nfs/backups
+    #         opts: bind
+    #     - mount:
+    #         state: mounted
+    #         fstype: none
+    #         src: /mnt/storage/media
+    #         path: /srv/nfs/media
+    #         opts: bind
+    #     - mount:
+    #         state: mounted
+    #         fstype: none
+    #         src: /mnt/storage/games
+    #         path: /srv/nfs/games
+    #         opts: bind}}}
+
+- name: Setup samba # {{{
+  hosts: piserver
+  become: yes
+  tags: samba_install
+  tasks:
+    - name: Ensure samba is installed
+      apt:
+        name: samba
+        state: present
+    - name: Ensure samba-common-bin is installed
+      apt:
+        name: samba-common-bin
+        state: present
+    - name: Setup shares
+      copy:
+        content: |
+          [global]
+          use sendfile = yes
+          min receivefile size = 16384
+          aio read size = 1
+          aio write size = 1
+          socket options = IPTOS_LOWDELAY TCP_NODELAY IPTOS_THROUGHPUT SO_RCVBUF=131072 SO_SNDBUF=131072
+
+          [media]
+          valid users = officeshield lrshield alan
+          path = /mnt/storage/media
+          writeable=Yes
+          create mask=0777
+          directory mask=0777
+          public=no
+        dest: /etc/samba/smb.conf
+        owner: root
+        group: root
+        mode: '0444'
+    - name: Ensure samba started
+      service:
+        name: smbd
+        state: restarted
+        enabled: true # }}}
+
+- name: Install Plex # {{{
+  hosts: piserver
+  become: yes
+  tags: plex
+  tasks:
+    - name: Add Plex repo key
+      apt_key:
+        url: https://downloads.plex.tv/plex-keys/PlexSign.key
+        state: present
+    - name: Add Plex repo
+      apt_repository:
+        repo: 'deb https://downloads.plex.tv/repo/deb public main'
+        state: present
+        update_cache: yes
+    - name: Install Plex
+      apt:
+        name: plexmediaserver
+        state: latest
+    - name: Enable Plex service
+      service:
+        name: plexmediaserver
+        enabled: true
+        state: started # }}}
+
+- name: Install SSM Agent # {{{
+  hosts: piserver
+  tags: ssm-agent
+  become: yes
+  tasks:
+    - name: Install awscli
+      apt:
+        name: awscli
+        state: latest
+    - name: Install SSM agent
+      apt:
+        deb: https://s3.eu-west-1.amazonaws.com/amazon-ssm-eu-west-1/latest/debian_arm/amazon-ssm-agent.deb # }}}
+
+- name: Install irqbalance # {{{
+  hosts: piserver
+  tags: irqbalance
+  become: yes
+  tasks:
+    - name: Install irqbalance
+      apt:
+        name: irqbalance
+        state: present
+    - name: Start and enable irqbalance service
+      service:
+        name: irqbalance
+        enabled: true
+        state: started
+# }}}
+
+- name: Install deluge # {{{
+  hosts: piserver
+  tags: deluge
+  become: yes
+  tasks:
+    - name: Install deluge
+      apt:
+        name:
+          - deluge-console
+          - deluge-web
+          - deluged
+          - python-mako
+        state: latest
+    - name: Install deluge-console
+      apt:
+        name: deluge-console
+        state: latest
+    - name: Enable deluged
+      copy:
+        content: |
+          ENABLE_DELUGED=1
+        dest: /etc/default/deluged
+    - name: Create deluge user
+      user:
+        name: deluge
+        state: present
+    - name: Ensure deluged restarted
+      service:
+        name: deluged
+        state: restarted
+    - name: deluge-web service
+      copy:
+        content: |
+          [Unit]
+          Description=Deluge Bittorrent Client Web Interface
+          Documentation=man:deluge-web
+          After=network-online.target deluged.service
+          Wants=deluged.service
+
+          [Service]
+          Type=simple
+          UMask=027
+
+          ExecStart=/usr/bin/deluge-web
+
+          Restart=on-failure
+
+          [Install]
+          WantedBy=multi-user.target
+        dest: /etc/systemd/system/deluge-web.service
+      notify:
+        - reload systemd
+    - name: Create deluge-web service override
+      file:
+        path:
+          - '/etc/systemd/system/deluge-web.service.d'
+          - '/etc/systemd/system/deluged.service.d/'
+        state: directory
+    - name: Override deluge-web service user
+      copy:
+        content: |
+          # Override service user
+          [Service]
+          User=deluge
+          Group=deluge
+        dest: /etc/systemd/system/deluge-web.service.d/user.conf
+      notify:
+        - reload systemd
+    - name: Start and enable deluge-web
+      service:
+        name: deluge-web
+        enabled: true
+        state: started
+  handlers:
+    - name: reload systemd
+      command: systemctl daemon-reload # }}}

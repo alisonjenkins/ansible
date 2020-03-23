@@ -542,9 +542,9 @@
           group: alan
         become: yes
         become_user: alan
-      - command: "chezmoi init {{ dotfiles_repo }}"
-        become: yes
-        become_user: alan
+      # - command: "chezmoi init {{ dotfiles_repo }}"
+      #   become: yes
+      #   become_user: alan
       - name: Get uid of alan user
         become: false
         local_action: command id -u alan

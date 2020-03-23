@@ -66,17 +66,19 @@ all:
         - fsck
       use_network_manager: true
 
-    k8s-master-01:
-      ansible_host: 192.168.1.80
+    # k8s-master-01:
+    #   ansible_host: 192.168.1.80
 
-    k8s-worker-01:
-      ansible_host: 192.168.1.81
+    # k8s-worker-01:
+    #   ansible_host: 192.168.1.81
 
-    k8s-worker-02:
-      ansible_host: 192.168.1.82
+    # k8s-worker-02:
+    #   ansible_host: 192.168.1.82
 
-    k8s-worker-03:
-      ansible_host: 192.168.1.83
+    # k8s-worker-03:
+    #   ansible_host: 192.168.1.83
+    piserver:
+      ansible_host: 192.168.86.113
 
   children:
     router:
@@ -88,23 +90,29 @@ all:
         alan-desktop:
         alan-laptop:
 
-    kubernetes:
+    piserver:
       hosts:
-        k8s-master-01
-        k8s-worker-01
-        k8s-worker-02
-        k8s-worker-03
+        piserver:
       vars:
         ansible_password: raspberry
 
-    kubernetes_masters:
-      hosts:
-        k8s-master-01
+    # kubernetes:
+    #   hosts:
+    #     k8s-master-01
+    #     k8s-worker-01
+    #     k8s-worker-02
+    #     k8s-worker-03
+    #   vars:
+    #     ansible_password: raspberry
 
-    kubernetes_workers:
-      hosts:
-        k8s-worker-01
-        k8s-worker-02
-        k8s-worker-03
+    # kubernetes_masters:
+    #   hosts:
+    #     k8s-master-01
+
+    # kubernetes_workers:
+    #   hosts:
+    #     k8s-worker-01
+    #     k8s-worker-02
+    #     k8s-worker-03
 
 # vim: set ft=yaml:
