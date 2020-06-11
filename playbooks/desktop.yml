@@ -300,6 +300,7 @@
         - exa
         - exfat-utils
         - feh
+        - file-roller
         - firefox
         - fortune-mod
         - freemind
@@ -310,7 +311,7 @@
         - go
         - graphviz
         - handbrake
-        - i3-wm
+        - i3-gaps
         - i3blocks
         - i3blocks-contrib-git
         - i3lock
@@ -333,6 +334,7 @@
         - libreoffice-fresh-en-gb
         - libva-intel-driver
         - lnav
+        - lrzip
         - lshw
         - lutris
         - mailwizard-git
@@ -373,7 +375,8 @@
         - polybar
         - postman-bin
         - powerline-fonts
-        - powershell
+        - powershell-bin
+        - pulseaudio-alsa
         - pulseaudio-modules-bt-git
         - pv
         - pwgen
@@ -391,6 +394,7 @@
         - shellcheck
         - slack-desktop
         - spotify
+        - squashfs-tools
         - sshuttle
         - steam
         - steam-native-runtime
@@ -412,8 +416,10 @@
         - ttf-droid
         - ttf-unifont
         - uhk-agent-appimage
+        - unace
         - unbound
         - unigine-heaven
+        - unrar
         - uvesafb-dkms
         - vagrant
         - virt-manager
