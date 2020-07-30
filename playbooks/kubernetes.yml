@@ -7,8 +7,8 @@
     - name: Reset kubernetees
       shell: |
         kubeadm reset -f
-        #weave reset
-        #rm -f /opt/cni/bin/weave-*
+        weave reset
+        rm -f /opt/cni/bin/weave-*
         ip link del cni0
         ip link del flannel.1
         ip link del weave
@@ -35,8 +35,8 @@
     - name: Reset kubernetees
       shell: |
         kubeadm reset -f
-        #weave reset
-        #rm -f /opt/cni/bin/weave-*
+        weave reset
+        rm -f /opt/cni/bin/weave-*
         ip link del cni0
         ip link del flannel.1
         iptables -F
@@ -62,9 +62,9 @@
     - reboot:
 
 - hosts: kubernetes
+  tags: [ never, init ]
   remote_user: pi
   become: yes
-  tags: [ never, init ]
   tasks:
     - name: Setup passwordless sudo for my user
       lineinfile:
@@ -97,8 +97,15 @@
         user: alan
         state: present
         key: "{{ lookup('file', '/home/alan/git/ssh_keys/id_personal.pub') }}"
+    - name: Get root PARTUUID
+      shell: cat /proc/cmdline | sed 's/ /\n/g' | grep 'root='
+      args:
+        executable: /bin/bash
+      changed_when: False
+      ignore_errors: no
+      register: rootuuid
     - name: Configure kernel params for groups
-      copy: content="console=serial0,115200 console=tty1 root=PARTUUID=6c586e13-02 rootfstype=ext4 elevator=deadline fsck.repair=yes rootwait cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory" dest=/boot/cmdline.txt
+      copy: content="console=serial0,115200 console=tty1 {{ rootuuid.stdout }} rootfstype=ext4 elevator=deadline fsck.repair=yes rootwait cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory" dest=/boot/cmdline.txt
     - name: Kill Pis running processes
       remote_user: alan
       shell: kill -9 $(ps -eo pid,user,comm | awk '/pi/ { print $1; }')
@@ -113,7 +120,7 @@
       reboot:
 
 - hosts: kubernetes
-  tags: install
+  tags: [never, install]
   become: yes
   tasks:
     - name: Add Docker repo apt-key
@@ -152,9 +159,6 @@
     - name: Install kubernetes components
       apt:
         name: [
-          # 'kubeadm=1.6.0-00',
-          # 'kubelet=1.6.0-00',
-          # 'kubectl=1.6.0-00'
           'kubeadm',
           'kubelet',
           'kubectl'
@@ -178,58 +182,54 @@
         name: dphys-swapfile
         enabled: no
         state: stopped
-
-- hosts: kubernetes
-  become: yes
-  become_user: root
-  tasks:
-  - name: Set hostname
-    hostname:
-      name: "{{ inventory_hostname }}"
-  - name: Configure docker to use systemd cgroup driver
-    template:
-      src: /etc/ansible/templates/docker/docker-daemon-kubernetes.json
-      dest: /etc/docker/daemon.json
-  - name: Populate /etc/hosts
-    lineinfile:
-      path: /etc/hosts
-      line: "{{ ansible_facts['eth0']['ipv4']['address'] }}       {{ inventory_hostname }}"
-  - name: Docker service started and enabled
-    service:
-      name: docker
-      state: restarted
-      enabled: yes
-  - name: Enable netfilter on bridges
-    block:
-      - sysctl:
-          name: net.bridge.bridge-nf-call-ip6tables
-          value: '1'
-      - sysctl:
-          name: net.bridge.bridge-nf-call-iptables
-          value: '1'
-      - sysctl:
-          name: net.bridge.bridge-nf-call-arptables
-          value: '1'
-  - name: Ensure legacy iptables backends are in use
-    block:
-      - command: update-alternatives --set iptables /usr/sbin/iptables-legacy
-      - command: update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy
-      - command: update-alternatives --set arptables /usr/sbin/arptables-legacy
-      - command: update-alternatives --set ebtables /usr/sbin/ebtables-legacy
-  - name: Install unbound
-    apt:
-      name: unbound
-      state: absent
-  - name: resolvconf
-    lineinfile:
-      path: /etc/resolv.conf
-      line: 'nameserver 192.168.86.1'
-  - name: Pip dependencies
-    pip:
-      name:  ['openshift', 'kubernetes-validate']
-      executable: pip3
+    - name: Set hostname
+      hostname:
+        name: "{{ inventory_hostname }}"
+    - name: Configure docker to use systemd cgroup driver
+      template:
+        src: /etc/ansible/templates/docker/docker-daemon-kubernetes.json
+        dest: /etc/docker/daemon.json
+    - name: Populate /etc/hosts
+      lineinfile:
+        path: /etc/hosts
+        line: "{{ ansible_facts['eth0']['ipv4']['address'] }}       {{ inventory_hostname }}"
+    - name: Docker service started and enabled
+      service:
+        name: docker
+        state: restarted
+        enabled: yes
+    - name: Enable netfilter on bridges
+      block:
+        - sysctl:
+            name: net.bridge.bridge-nf-call-ip6tables
+            value: '1'
+        - sysctl:
+            name: net.bridge.bridge-nf-call-iptables
+            value: '1'
+        - sysctl:
+            name: net.bridge.bridge-nf-call-arptables
+            value: '1'
+    - name: Ensure legacy iptables backends are in use
+      block:
+        - command: update-alternatives --set iptables /usr/sbin/iptables-legacy
+        - command: update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy
+        - command: update-alternatives --set arptables /usr/sbin/arptables-legacy
+        - command: update-alternatives --set ebtables /usr/sbin/ebtables-legacy
+    - name: Install unbound
+      apt:
+        name: unbound
+        state: absent
+    - name: resolvconf
+      lineinfile:
+        path: /etc/resolv.conf
+        line: 'nameserver 192.168.86.1'
+    - name: Pip dependencies
+      pip:
+        name:  ['openshift', 'kubernetes-validate']
+        executable: pip3
 
 - hosts: kubernetes_masters
+  tags: [never, master-install]
   become: yes
   tasks:
     # - name: Pull kubernetes containers
@@ -242,6 +242,9 @@
       command: kubeadm init --config /etc/kubernetes/kubeadm-config.yml
       args:
         creates: /var/lib/kubelet/config.yaml
+    - name: Wait for kubelet to start
+      pause:
+        seconds: 30
     - name: Setup kubeconfig
       become: no
       changed_when: False
@@ -252,40 +255,69 @@
     - name: Copy admin config to local system
       fetch:
         src: /etc/kubernetes/admin.conf
-        dest: /home/alan/.kube/config
+        dest: /home/alan/.kube/home
         flat: yes
-    - name: Setup flannel CNI
-      k8s:
-        state: present
-        definition: "{{lookup('file', '/etc/ansible/files/kubernetes/flannel/kube-flannel.yml')}}"
-        kubeconfig: /etc/kubernetes/admin.conf
-        validate:
-          fail_on_error: yes
-          strict: yes
-    - name: Setup Kubernetes Dashboard
-      k8s:
-        state: present
-        definition: "{{lookup('file', '/etc/ansible/files/kubernetes/kubernetes-dashboard/kubernetes-dashboard.yaml')}}"
-        kubeconfig: /etc/kubernetes/admin.conf
-        validate:
-          fail_on_error: yes
-          strict: yes
-    - name: Setup Helm Tiller
-      k8s:
-        state: present
-        definition: "{{lookup('file', '/etc/ansible/files/kubernetes/helm-tiller/tiller.yaml')}}"
-        kubeconfig: /etc/kubernetes/admin.conf
-        validate:
-          fail_on_error: yes
-          strict: yes
-    - name: Setup MetalLB
-      k8s:
-        state: present
-        definition: "{{lookup('file', '/etc/ansible/files/kubernetes/metallb/metallb.yaml')}}"
-        kubeconfig: /etc/kubernetes/admin.conf
-        validate:
-          fail_on_error: yes
-          strict: yes
+
+- hosts: kubernetes_masters
+  tags: [never, cni]
+  become: yes
+  tasks:
+    - name: Setup Weave Net
+      block:
+        - name: Get Kubernetes version hash
+          shell: kubectl version | base64 | tr -d '\n'
+          args:
+            executable: /bin/bash
+          changed_when: False
+          register: kubernetes_version_hash
+        - name: Check if weavenet password already exists
+          shell: test -f /var/lib/weave/weave-passwd
+          args:
+            executable: /bin/bash
+          register: weave_password_exists
+          changed_when: False
+          ignore_errors: True
+        - name: Install pwgen
+          apt:
+            name: "pwgen"
+            state: present
+          when: weave_password_exists.rc == 1
+        - name: Create Weave directory
+          file:
+            state: directory
+            path: /var/lib/weave
+        - name: Generate WeaveNet password
+          shell: pwgen -y 20
+          changed_when: False
+          register: weavenet_password
+          when: weave_password_exists.rc == 1
+        - name: Create Weave password file
+          copy:
+            content: "{{ weavenet_password.stdout }}"
+            dest: /var/lib/weave/weave-passwd
+          when: weave_password_exists.rc == 1
+        - name: Create weave-passwd secret
+          shell: "kubectl create secret -n kube-system generic weave-passwd --kubeconfig=/etc/kubernetes/admin.conf --from-file=/var/lib/weave/weave-passwd"
+          args:
+            executable: /bin/bash
+          when: weave_password_exists.rc == 1
+        - name: Get WeaveNet manifest
+          local_action:
+            module: get_url
+            url: "https://cloud.weave.works/k8s/net?k8s-version={{ kubernetes_version_hash.stdout }}&password-secret=weave-passwd"
+            dest: /tmp/weave-net.yaml
+        - name: Install WeaveNet Manifest
+          k8s:
+            state: present
+            definition: "{{lookup('file', '/tmp/weave-net.yaml')}}"
+            kubeconfig: /etc/kubernetes/admin.conf
+            validate:
+              fail_on_error: yes
+              strict: yes
+
+- hosts: kubernetes_masters
+  become: yes
+  tasks:
     - name: Get k8s join command
       shell: kubeadm token create --print-join-command
       changed_when: False
@@ -310,18 +342,3 @@
         name: kubelet
         enabled: yes
         state: started
-
-- hosts: kubernetes_masters
-  tags: [ "applications" ]
-  become: yes
-  tasks:
-    - name: Ensure applications are all installed
-      block:
-        - name: Motioneye
-          k8s:
-            state: present
-            definition: "{{lookup('file', '/etc/ansible/files/kubernetes/motioneye/deployment.yaml')}}"
-            kubeconfig: /etc/kubernetes/admin.conf
-            validate:
-              fail_on_error: yes
-              strict: yes

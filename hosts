@@ -1,6 +1,5 @@
 all:
   hosts:
-
     router:
       ansible_host: 192.168.1.1
       ansible_user: alan
@@ -108,10 +107,16 @@ all:
     piserver:
       ansible_host: 192.168.86.113
 
+    k8s-master-01:
+      ansible_host: 192.168.86.80
+    k8s-worker-02:
+      ansible_host: 192.168.86.82
+    printserver:
+      ansible_host: 192.168.86.54
   children:
     router:
       hosts:
-        router
+        router:
 
     desktops:
       hosts:
@@ -124,23 +129,19 @@ all:
       vars:
         ansible_password: raspberry
 
-    # kubernetes:
-    #   hosts:
-    #     k8s-master-01
-    #     k8s-worker-01
-    #     k8s-worker-02
-    #     k8s-worker-03
-    #   vars:
-    #     ansible_password: raspberry
+    kubernetes:
+      hosts:
+        k8s-master-01:
+        k8s-worker-02:
+      vars:
+        ansible_password: raspberry
 
-    # kubernetes_masters:
-    #   hosts:
-    #     k8s-master-01
+    kubernetes_masters:
+      hosts:
+        k8s-master-01:
 
-    # kubernetes_workers:
-    #   hosts:
-    #     k8s-worker-01
-    #     k8s-worker-02
-    #     k8s-worker-03
+    kubernetes_workers:
+      hosts:
+        k8s-worker-02:
 
 # vim: set ft=yaml:
