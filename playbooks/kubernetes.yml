@@ -27,6 +27,10 @@
       file:
         state: absent
         path: /etc/kubernetes
+    - name: Delete WeaveNet password file
+      file:
+        state: absent
+        path: /var/lib/weave/weave-passwd
 
 - hosts: kubernetes_masters
   become: yes
@@ -223,10 +227,14 @@
       lineinfile:
         path: /etc/resolv.conf
         line: 'nameserver 192.168.86.1'
-    - name: Pip dependencies
+    - name: Pip3 dependencies
       pip:
         name:  ['openshift', 'kubernetes-validate']
         executable: pip3
+    - name: Pip2 dependencies
+      pip:
+        name:  ['openshift', 'kubernetes-validate']
+        executable: pip2
 
 - hosts: kubernetes_masters
   tags: [never, master-install]
@@ -252,6 +260,8 @@
         mkdir -p $HOME/.kube
         sudo cp /etc/kubernetes/admin.conf $HOME/.kube/config
         sudo chown $(id -u):$(id -g) $HOME/.kube/config
+        sudo mkdir /root/.kube
+        sudo cp /etc/kubernetes/admin.conf /root/.kube/config
     - name: Copy admin config to local system
       fetch:
         src: /etc/kubernetes/admin.conf

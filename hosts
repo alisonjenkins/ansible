@@ -109,7 +109,7 @@ all:
 
     k8s-master-01:
       ansible_host: 192.168.86.80
-    k8s-worker-02:
+    k8s-worker-01:
       ansible_host: 192.168.86.82
     printserver:
       ansible_host: 192.168.86.54
@@ -132,9 +132,10 @@ all:
     kubernetes:
       hosts:
         k8s-master-01:
-        k8s-worker-02:
+        k8s-worker-01:
       vars:
         ansible_password: raspberry
+        ansible_python: /usr/bin/python3
 
     kubernetes_masters:
       hosts:
@@ -142,6 +143,6 @@ all:
 
     kubernetes_workers:
       hosts:
-        k8s-worker-02:
+        k8s-worker-01:
 
 # vim: set ft=yaml:
