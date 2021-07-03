@@ -1,75 +1,77 @@
 ---
 - hosts: desktops
   remote_user: root
+  become: yes
   tasks:
-    - user:
-        name: aur_builder
-        system: yes
-    - lineinfile:
-        path: /etc/sudoers.d/11-install-aur_builder
-        line: 'aur_builder ALL=(ALL) NOPASSWD: /usr/bin/pacman'
-        create: yes
-        validate: 'visudo -cf %s'
-    - name: Arch tweaks
-      block:
-        - name: configure parallel package compression
-          lineinfile:
-            path: /etc/makepkg.conf
-            state: present
-            line: 'COMPRESSXZ=(xz -c -z - --threads=0)'
-            regexp: '^COMPRESSXZ='
-        - name: configure zst package compression
-          lineinfile:
-            path: /etc/makepkg.conf
-            state: present
-            line: "PKGEXT='.pkg.tar.zst'"
-            regexp: '^PKGEXT='
-        - name: set C compiler flags
-          lineinfile:
-            path: /etc/makepkg.conf
-            state: present
-            line: 'CFLAGS="-march=native -O2 -pipe -fstack-protector-strong"'
-            regexp: '^CFLAGS='
-        - name: set C++ compiler flags
-          lineinfile:
-            path: /etc/makepkg.conf
-            state: present
-            line: 'CXXFLAGS="${CFLAGS}"'
-            regexp: '^CXXFLAGS='
-        - name: set makepkg options
-          lineinfile:
-            path: /etc/makepkg.conf
-            state: present
-            line: 'OPTIONS=(strip docs !libtool !staticlibs emptydirs zipman purge !optipng !upx !debug)'
-            regexp: '^OPTIONS='
-        - name: set makepkg buildenv
-          lineinfile:
-            path: /etc/makepkg.conf
-            state: present
-            line: 'BUILDENV=(!distcc color ccache check !sign)'
-            regexp: '^BUILDENV='
-        - name: setup parallel make jobs
-          lineinfile:
-            path: /etc/makepkg.conf
-            state: present
-            line: 'MAKEFLAGS="-j {{ ansible_processor_cores * ansible_processor_threads_per_core }}"'
-            regexp: '^MAKEFLAGS='
-        - name: Ensure aria2 is installed
-          package:
-            name: aria2
-            state: present
-        - name: ensure ccache is installed
-          package:
-            name: ccache
-            state: present
-        - name: Enable Arch multilib repo
-          block:
-            - blockinfile:
-                path: /etc/pacman.conf
-                state: present
-                block: |
-                  [multilib]
-                  Include = /etc/pacman.d/mirrorlist
+  - user:
+      name: aur_builder
+      group: wheel
+      system: yes
+  - lineinfile:
+      path: /etc/sudoers.d/11-install-aur_builder
+      line: 'aur_builder ALL=(ALL) NOPASSWD: /usr/bin/pacman'
+      create: yes
+      validate: 'visudo -cf %s'
+  - name: Arch tweaks
+    block:
+      - name: configure parallel package compression
+        lineinfile:
+          path: /etc/makepkg.conf
+          state: present
+          line: 'COMPRESSXZ=(xz -c -z - --threads=0)'
+          regexp: '^COMPRESSXZ='
+      - name: configure zst package compression
+        lineinfile:
+          path: /etc/makepkg.conf
+          state: present
+          line: "PKGEXT='.pkg.tar.zst'"
+          regexp: "^PKGEXT="
+      - name: set C compiler flags
+        lineinfile:
+          path: /etc/makepkg.conf
+          state: present
+          line: 'CFLAGS="-march=native -O2 -pipe -fstack-protector-strong"'
+          regexp: '^CFLAGS='
+      - name: set C++ compiler flags
+        lineinfile:
+          path: /etc/makepkg.conf
+          state: present
+          line: 'CXXFLAGS="${CFLAGS}"'
+          regexp: '^CXXFLAGS='
+      - name: set makepkg options
+        lineinfile:
+          path: /etc/makepkg.conf
+          state: present
+          line: 'OPTIONS=(strip docs !libtool !staticlibs emptydirs zipman purge !optipng !upx !debug)'
+          regexp: '^OPTIONS='
+      - name: set makepkg buildenv
+        lineinfile:
+          path: /etc/makepkg.conf
+          state: present
+          line: 'BUILDENV=(!distcc color ccache check !sign)'
+          regexp: '^BUILDENV='
+      - name: setup parallel make jobs
+        lineinfile:
+          path: /etc/makepkg.conf
+          state: present
+          line: 'MAKEFLAGS="-j {{ ansible_processor_cores * ansible_processor_threads_per_core }}"'
+          regexp: '^MAKEFLAGS='
+      - name: Ensure aria2 is installed
+        package:
+          name: aria2
+          state: present
+      # - name: ensure ccache is installed
+      #   package:
+      #     name: ccache
+      #     state: present
+      - name: Enable Arch multilib repo
+        block:
+          - blockinfile:
+              path: /etc/pacman.conf
+              state: present
+              block: |
+                [multilib]
+                Include = /etc/pacman.d/mirrorlist
 
     - name: ensure the 'yay' aur helper is installed
       aur:
@@ -83,52 +85,58 @@
         name: gvim
         state: present
 
-    - name: Install base system
-      block:
-        - name: Sudo cofiguration
-          block:
-            - name: keep ssh_auth_sock
-              copy:
-                dest: /etc/sudoers.d/keep_auth_sock
-                src: /etc/ansible/files/sudoers/keep_auth_sock
-                validate: 'visudo -cf %s'
-            - name: wheel sudo group
-              copy:
-                dest: /etc/sudoers.d/wheel_sudo
-                src: /etc/ansible/files/sudoers/wheel_sudo
-                validate: 'visudo -cf %s'
-        - name: Install base packages
-          package:
-            name: '{{ item }}'
-            state: present
-          with_items:
-            - augeas
-            - bash-completion
-            - bluez
-            - docker
-            - git
-            - htop
-            - iwd
-            - moreutils
-            - ncdu
-            - openvpn
-            - pkgfile
-            - python-pip
-            - python2-pip
-            - ranger
-            - rsync
-            - tmux
-            - ufw
+  - name: Install base system
+    block:
+      - name: Sudo cofiguration
+        block:
+          - name: keep ssh_auth_sock
+            copy:
+              dest: /etc/sudoers.d/keep_auth_sock
+              src: "{{playbook_dir}}/../files/sudoers/keep_auth_sock"
+              validate: 'visudo -cf %s'
+          - name: wheel sudo group
+            copy:
+              dest: /etc/sudoers.d/wheel_sudo
+              src: "{{playbook_dir}}/../files/sudoers/wheel_sudo"
+              validate: 'visudo -cf %s'
+          - name: power control for sudo group
+            copy:
+              dest: /etc/sudoers.d/power_commands
+              src: "{{playbook_dir}}/../files/sudoers/power_commands"
+              validate: 'visudo -cf %s'
+      - name: Install base packages
+        package:
+          name: "{{ item }}"
+          state: present
+        with_items:
+          - augeas
+          - bash-completion
+          - bluez
+          - docker
+          - git
+          - htop
+          - iwd
+          - moreutils
+          - ncdu
+          - openvpn
+          - pkgfile
+          - python-pip
+          - python2-pip
+          - ranger
+          - rsync
+          - tmux
+          - ufw
 
-        - name: Enable UFW
-          service:
-            name: ufw
-            enabled: true
-            state: restarted
+      - name: Enable UFW
+        become: true
+        service:
+          name: ufw
+          enabled: true
+          state: restarted
 
-        - name: Set deny as default ufw policy
-          become: false
-          local_action: command ufw default deny
+      - name: Set deny as default ufw policy
+        become: true
+        local_action: command ufw default deny
 
         - name: Install connman
           package:
@@ -146,15 +154,15 @@
             group: root
           when: use_connman is defined
 
-        - name: Configure connman
-          template:
-            src: /etc/ansible/templates/connman-main.conf.j2
-            dest: /etc/connman/main.conf
-            owner: root
-            group: root
-            mode: 0664
-          notify: Restart connman
-          when: use_connman is defined
+      - name: Configure connman
+        template:
+          src: "{{playbook_dir}}/../templates/connman-main.conf.j2"
+          dest: /etc/connman/main.conf
+          owner: root
+          group: root
+          mode: 0664
+        notify: Restart connman
+        when: use_connman is defined
 
         - name: Enable connman
           service:
@@ -256,231 +264,228 @@
             - connman_dmenu-git
           when: use_connman is defined
 
-        - name: Setup desktop packages
-          tags: install_packages
-          aur:
-            name: '{{ item }}'
-            skip_installed: true
-          with_items:
-            # - appimage-git
-            # - cloud-print-connector-git
-            # - howdy
-            # - keepassx
-            # - otf-fira-code
-            # - sddm
-            # - spotify
-            # - swagger-codegen
-            # - ttf-unifont
-            # - uhk-agent-appimage
-            # - xboxdrv
-            - arandr
-            - aria2
-            - asciinema
-            - at
-            - augeas
-            - awesome-terminal-fonts
-            - aws-cli
-            - betterlockscreen
-            - bind-tools
-            - blueman
-            - bluez
-            - bzip2
-            - chezmoi
-            - chromium
-            - chromium-widevine
-            - cksfv
-            - cmus
-            - compton
-            - ctags
-            - deluge
-            - direnv
-            - discord
-            - dmenu
-            - dmidecode
-            - dnsmasq
-            - docker-compose
-            - dunst
-            - dzen2
-            - ethtool
-            - evince
-            - exa
-            - exfat-utils
-            - feh
-            - file-roller
-            - firefox
-            - fortune-mod
-            - freemind
-            - gamemode
-            - geekbench
-            - gimp
-            - gitahead-bin
-            - go
-            - graphviz
-            - handbrake
-            - i3-gaps
-            - i3blocks
-            - i3blocks-contrib-git
-            - i3status
-            - inkscape
-            - intel-ucode
-            - iotop
-            - irqbalance
-            - jdk8-openjdk
-            - jq
-            - jupyter-notebook
-            - kdenlive
-            - keybase-gui
-            - kitty
-            - lib32-gamemode
-            - lib32-nvidia-utils
-            - lib32-vulkan-icd-loader
-            - lib32-vulkan-intel
-            - libinput-gestures
-            - libreoffice-fresh-en-gb
-            - libva-intel-driver
-            - lnav
-            - lrzip
-            - lshw
-            - lutris
-            - ly-git
-            - mailwizard-git
-            - mariadb-clients
-            - mpv
-            - multimc-git
-            - nbtexplorer
-            - ncdu
-            - neovim
-            - nethogs
-            - nmap
-            - npm
-            - nvidia-dkms
-            - nvidia-settings
-            - nvidia-utils
-            - nvme-cli
-            - obs-studio
-            - openttd
-            - openttd-opengfx
-            - openttd-openmsx
-            - openttd-opensfx
-            - opus-tools
-            - otf-font-awesome
-            - ovmf
-            - p7zip
-            - packer
-            - pacman-contrib
-            - pass
-            - pavucontrol
-            - pidgin
-            - pigz
-            - piper
-            - pitivi
-            - playerctl
-            - plymouth-git
-            - podman
-            - polybar
-            - postman-bin
-            - powerline-fonts
-            - powershell-bin
-            - prime-run
-            - pulseaudio-alsa
-            - pulseaudio-modules-bt-git
-            - pv
-            - pwgen
-            - python-pynvim
-            - qemu
-            - qemu-arch-extra
-            - qterminal
-            - reflector
-            - ripgrep
-            - rng-tools
-            - rofi
-            - samba
-            - seahorse
-            - shellcheck
-            - slack-desktop
-            - squashfs-tools
-            - sshuttle
-            - steam
-            - steam-native-runtime
-            - strace
-            - stressapptest
-            - swagger-editor-git
-            - sway-git
-            - sxiv
-            - task
-            - tflint
-            - the_silver_searcher
-            - thunar
-            - thunar-archive-plugin
-            - thunar-media-tags-plugin
-            - thunar-volman
-            - tig
-            - tlp
-            - tmux
-            - ttf-droid
-            - unace
-            - unbound
-            - unigine-heaven
-            - unrar
-            - uvesafb-dkms
-            - vagrant
-            - virt-manager
-            - virtualbox
-            - virtualbox-host-dkms
-            - vlc
-            - vpn-unlimited
-            - vulkan-icd-loader
-            - vulkan-intel
-            - vulkan-tools
-            - waybar
-            - winetricks
-            - wireguard-dkms
-            - wireguard-tools
-            - wireshark-git
-            - xclip
-            - xorg-fonts-misc
-            - xorg-server-xephyr
-            - xorg-server-xwayland
-            - xorg-xev
-            - xorg-xkill
-            - xorg-xmodmap
-            - xorg-xprop
-            - xorg-xrandr
-            - xorg-xrdb
-            - xpadneo-dkms-git
-            - xsane
-            - xscreensaver
-            - xsel
-            - xss-lock
-            - yarn
-            - zramswap
-          become: yes
-          become_user: aur_builder
-    # - name: Enable sddm plymouth service
-    #   service:
-    #     name: sddm-plymouth
-    #     enabled: true
-    # - name: Enable ly service
-    #   service:
-    #     name: ly
-    #     enabled: true
-    - name: Nvidia Xorg conf
-      template:
-        src: /etc/ansible/templates/nvidia-xorg.conf.j2
-        dest: /etc/X11/xorg.conf
-        owner: root
-        group: root
-        mode: 0664
-      when: is_laptop is not defined
+      - name: Setup desktop packages
+        tags: install_packages
+        aur:
+          name: "{{ item }}"
+          skip_installed: true
+        with_items:
+        # - cloud-print-connector-git
+        # - howdy
+        # - swagger-codegen
+        # - xboxdrv
+        # - sddm
+        # - appimage-git
+        - arandr
+        - aria2
+        - asciinema
+        - at
+        - augeas
+        - awesome-terminal-fonts
+        - aws-cli
+        - betterlockscreen
+        - bind-tools
+        - blueman
+        - bluez
+        - bzip2
+        - chezmoi
+        - chromium
+        - chromium-widevine
+        - cksfv
+        - cmus
+        - compton
+        - ctags
+        - deluge
+        - direnv
+        - discord
+        - dmenu
+        - dmidecode
+        - dnsmasq
+        # - docker-compose
+        - dunst
+        - dzen2
+        - ethtool
+        - evince
+        - exa
+        - exfat-utils
+        - feh
+        - file-roller
+        - firefox
+        - fortune-mod
+        - freemind
+        - gamemode
+        - geekbench
+        - gimp
+        - gitahead-bin
+        - go
+        - graphviz
+        - handbrake
+        - i3-gaps
+        - i3blocks
+        - i3blocks-contrib-git
+        - i3status
+        - inkscape
+        - intel-ucode
+        - iotop
+        - irqbalance
+        - jdk8-openjdk
+        - jq
+        - jupyter-notebook
+        - kdenlive
+        - keepassx
+        - keybase-gui
+        - kitty
+        - lib32-gamemode
+        # - lib32-nvidia-utils
+        - lib32-vulkan-icd-loader
+        - lib32-vulkan-intel
+        - libinput-gestures
+        - libreoffice-fresh-en-gb
+        - libva-intel-driver
+        - lnav
+        - lrzip
+        - lshw
+        - lutris
+        - ly-git
+        # - mailwizard-git
+        - mariadb-clients
+        - mpv
+        - multimc-git
+        - nbtexplorer
+        - ncdu
+        - neovim
+        - nethogs
+        - nmap
+        - npm
+        # - nvidia-dkms
+        # - nvidia-settings
+        # - nvidia-utils
+        - nvme-cli
+        - obs-studio
+        - openttd
+        - openttd-opengfx
+        - openttd-openmsx
+        - openttd-opensfx
+        - opus-tools
+        # - otf-fira-code
+        - otf-font-awesome
+        - ovmf
+        - p7zip
+        - packer
+        - pacman-contrib
+        - pass
+        - pavucontrol
+        - pidgin
+        - pigz
+        - piper
+        - pitivi
+        - playerctl
+        - plymouth-git
+        - podman
+        - polybar
+        - postman-bin
+        - powerline-fonts
+        - powershell-bin
+        - pulseaudio-alsa
+        # - pulseaudio-modules-bt-git
+        - pv
+        - pwgen
+        - python-pynvim
+        - qemu
+        - qemu-arch-extra
+        - qterminal
+        - reflector
+        - ripgrep
+        - rng-tools
+        - rofi
+        - samba
+        - seahorse
+        - shellcheck
+        - slack-desktop
+        - squashfs-tools
+        - sshuttle
+        - steam
+        - steam-native-runtime
+        - strace
+        - stressapptest
+        - swagger-editor-git
+        - sway
+        - sxiv
+        # - task
+        - tflint
+        - the_silver_searcher
+        - thunar
+        - thunar-archive-plugin
+        - thunar-media-tags-plugin
+        - thunar-volman
+        - tig
+        - tlp
+        - tmux
+        - ttf-droid
+        - ttf-unifont
+        - uhk-agent-appimage
+        # - unace
+        - unbound
+        - unigine-heaven
+        - unrar
+        - uvesafb-dkms
+        - vagrant
+        - virt-manager
+        - virtualbox
+        - virtualbox-host-dkms
+        - vlc
+        - vulkan-icd-loader
+        - vulkan-intel
+        - vulkan-tools
+        - waybar
+        - winetricks
+        - wireguard-dkms
+        - wireguard-tools
+        - wireshark-git
+        - xclip
+        - xorg-fonts-misc
+        - xorg-server-xephyr
+        - xorg-server-xwayland
+        - xorg-xev
+        - xorg-xkill
+        - xorg-xmodmap
+        - xorg-xprop
+        - xorg-xrandr
+        - xorg-xrdb
+        - xpadneo-dkms-git
+        - xsane
+        - xscreensaver
+        - xsel
+        - xss-lock
+        - yarn
+        - zramswap
+        become: yes
+        become_user: aur_builder
+  # - name: Enable sddm plymouth service
+  #   service:
+  #     name: sddm-plymouth
+  #     enabled: true
+  # - name: Enable ly service
+  #   service:
+  #     name: ly
+  #     enabled: true
+  # - name: Nvidia Xorg conf
+  #   template:
+  #     src: /etc/ansible/templates/nvidia-xorg.conf.j2
+  #     dest: /etc/X11/xorg.conf
+  #     owner: root
+  #     group: root
+  #     mode: 0664
+  #   when: is_laptop is not defined
 
-    - name: Set global environment variables in /etc/environment
-      template:
-        src: /etc/ansible/templates/environment.sh.j2
-        dest: /etc/environment
-        owner: root
-        group: root
-        mode: 0664
-      when: global_environment_variables is defined
+  - name: Set global environment variables in /etc/environment
+    template:
+      src: "{{playbook_dir}}/../templates/environment.sh.j2"
+      dest: /etc/environment
+      owner: root
+      group: root
+      mode: 0664
+    when: global_environment_variables is defined
 
     # - name: NetworkManager DNS caching
     #   template:
@@ -491,21 +496,21 @@
     #     mode: 0664
     #   notify: NetworkManager restart
 
-    - name: Configure uvesafb
-      template:
-        src: /etc/ansible/templates/uvesafb.conf.j2
-        dest: /usr/lib/modprobe.d/uvesafb.conf
-        owner: root
-        group: root
-        mode: 0664
+  - name: Configure uvesafb
+    template:
+      src: "{{playbook_dir}}/../templates/uvesafb.conf.j2"
+      dest: /usr/lib/modprobe.d/uvesafb.conf
+      owner: root
+      group: root
+      mode: 0664
 
-    - name: Configure gamemode
-      template:
-        src: /etc/ansible/templates/gamemode.ini.j2
-        dest: /etc/gamemode.ini
-        owner: root
-        group: root
-        mode: 0644
+  - name: Configure gamemode
+    template:
+      src: "{{playbook_dir}}/../templates/gamemode.ini.j2"
+      dest: /etc/gamemode.ini
+      owner: root
+      group: root
+      mode: 0644
 
     - name: Enable rngd
       service:
@@ -536,54 +541,63 @@
     #     enabled: true
     #   when: nvidia_powertarget_tdp is defined
 
-    - name: Create mkinitcpio conf
-      tags: mkinitcpio
-      template:
-        src: /etc/ansible/templates/mkinitcpio.conf.j2
-        dest: /etc/mkinitcpio.conf
-        owner: root
-        group: root
-        mode: 0644
-      notify: create mkinitcpio
+  - name: Create mkinitcpio conf
+    tags: mkinitcpio
+    template:
+      src: "{{playbook_dir}}/../templates/mkinitcpio.conf.j2"
+      dest: /etc/mkinitcpio.conf
+      owner: root
+      group: root
+      mode: 0644
+    notify: create mkinitcpio
 
-    - name: Setup user dotfiles
-      block:
-        - file:
-            state: directory
-            path: /home/alan/.gnupg
-            mode: 0700
-            owner: alan
-            group: alan
-          become: yes
-          become_user: alan
-        # - command: "chezmoi init {{ dotfiles_repo }}"
-        #   become: yes
-        #   become_user: alan
-        - name: Get uid of alan user
-          become: false
-          local_action: command id -u alan
-          register: alan_uid
-        # - file:
-        #     state: link
-        #     src: '/run/user/{{ alan_uid.stdout }}/keybase/kbfs/private/ajenkins/ssh_keys'
-        #     path: /home/alan/git/ssh_keys
-        #     force: yes
-        #     mode: 0700
-        #     owner: alan
-        #     group: alan
-        # - file:
-        #     state: link
-        #     src: '/run/user/{{ alan_uid.stdout }}/keybase/kbfs/private/ajenkins/pass-password-store'
-        #     path: /home/alan/.password-store
-        #     force: yes
-        #     mode: 0700
-        #     owner: alan
-        #     group: alan
-        # - git:
-        #     accept_hostkey: yes
-        #     depth: 1
-        #     dest: /home/alan/git/dotfiles
-        #     repo: https://gitlab.com/alanjjenkins/dotfiles.git
+  - name: Setup user dotfiles
+    block:
+      - file:
+          state: directory
+          path: /home/alan/.gnupg
+          mode: 0700
+          owner: alan
+          group: alan
+        become: yes
+        become_user: alan
+      # - command: "chezmoi init {{ dotfiles_repo }}"
+      #   become: yes
+      #   become_user: alan
+      - name: Get uid of alan user
+        become: false
+        local_action: command id -u alan
+        register: alan_uid
+      - file:
+          state: link
+          src: "/run/user/{{ alan_uid.stdout }}/keybase/kbfs/private/ajenkins/ssh_keys"
+          path: /home/alan/git/ssh_keys
+          force: yes
+          mode: 0700
+          owner: alan
+          group: alan
+      - file:
+          state: link
+          src: "/run/user/{{ alan_uid.stdout }}/keybase/kbfs/private/ajenkins/pass-password-store"
+          path: /home/alan/.password-store
+          force: yes
+          mode: 0700
+          owner: alan
+          group: alan
+  
+  - name: Mount media SMB share
+    ansible.posix.mount:
+      src: //tower.lan/media
+      path: /mnt/media
+      opts: _netdev,credentials=/etc/samba/credentials/tower,iocharset=utf8,rw,uid=1000,gid=1000
+      state: mounted
+      fstype: cifs
+
+      # - git:
+      #     accept_hostkey: yes
+      #     depth: 1
+      #     dest: /home/alan/git/dotfiles
+      #     repo: https://gitlab.com/alanjjenkins/dotfiles.git
   handlers:
     - name: Restart connman
       service:
