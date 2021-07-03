@@ -1,0 +1,124 @@
+- hosts: printserver # {{{
+  remote_user: pi
+  become: yes
+  tags: [ never, init ]
+  tasks:
+    - name: Setup passwordless sudo for my user
+      lineinfile:
+        path: /etc/sudoers.d/10-alan-nopasswd
+        line: 'alan ALL=(ALL) NOPASSWD: ALL'
+        create: yes
+        validate: 'visudo -cf %s'
+    - name: Add my user
+      user:
+        name: alan
+        state: present
+        append: yes
+        groups:
+          - adm
+          - audio
+          - cdrom
+          - dialout
+          - games
+          - gpio
+          - i2c
+          - input
+          - netdev
+          - plugdev
+          - spi
+          - sudo
+          - users
+          - video
+    - name: Add SSH key to my user
+      authorized_key:
+        user: alan
+        state: present
+        key: "{{ lookup('file', '/home/alan/git/ssh_keys/id_personal.pub') }}"
+    - name: Kill Pis running processes
+      remote_user: alan
+      shell: kill -9 $(ps -eo pid,user,comm | awk '/pi/ { print $1; }')
+    - name: Remove Pi user
+      remote_user: alan
+      user:
+        name: pi
+        state: absent
+        remove: yes # }}}
+
+# {{{ Setup Google Cloud Print server
+- hosts: printserver
+  become: yes
+  tags: [ gcp ]
+  tasks:
+    - name: Add Google Cloudprint repo key
+      apt_key:
+        url: 'https://davesteele.github.io/key-366150CE.pub.txt'
+        state: present
+    - name: Install Google Cloudprint repo
+      apt_repository:
+        repo: 'deb http://davesteele.github.io/cloudprint-service/repo cloudprint-jessie main'
+        state: present
+        update_cache: yes
+    - name: Install Google Cloudprint
+      apt:
+        name:
+          - cloudprint
+          - cloudprint-service
+        state: present
+    - name: Enable Cloudprint service
+      service:
+        name: cloudprintd
+        enabled: true
+# }}}
+
+# {{{ Install printer driver
+# - hosts: printserver
+#   become: yes
+#   tags: printerdriver
+#   tasks:
+#     - name: Download printer ppd file
+#       get_url:
+#         url: https://raw.githubusercontent.com/winterheart/brother-drivers/master/cupswrappermfc9460/ppd/hl4570cdw.ppd
+#         dest: /usr/share/cups/model
+#         mode: '0444'
+#       notify: restart cups
+#   handlers:
+#     - name: restart cups
+#       service:
+#         name: cups
+#         state: restarted
+# }}}
+
+# {{{ Setup Avahi
+- hosts: printserver
+  become: yes
+  tasks:
+    - name: Setup avahi
+      apt:
+        name:
+          - avahi-daemon
+          - avahi-discover
+          - libnss-mdns
+        state: present
+# }}}
+
+# {{{ Install printer
+# - hosts: printserver
+#   become: yes
+#   tags: printersetup
+#   tasks:
+#     - name: Check if printer setup
+#       command: lpstat -a
+#       ignore_errors: yes
+#       changed_when: false
+#       register: wg_server_config
+#     - name: Setup printer
+#       block:
+#         - name: Get printer URI
+#           command: lpinfo -v | awk '/usb.*/ { print $2; }'
+#           register: printeruri
+#           ignore_errors: yes
+#         - name: Add printer
+#           command: "lpadmin -p printer -E -v '{{ printeruri.stdout }}' -m 'hl4570cdw.ppd'"
+#         - name: Set printer as default
+#           command: lpoptions -d printer
+# }}}
