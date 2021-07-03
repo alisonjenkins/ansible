@@ -1,0 +1,104 @@
+# Init setup {{{
+- hosts: sb-emon
+  remote_user: pi
+  become: yes
+  tags: [ never, init ]
+  tasks:
+    - name: Setup passwordless sudo for my user
+      lineinfile:
+        path: /etc/sudoers.d/10-alan-nopasswd
+        line: 'alan ALL=(ALL) NOPASSWD: ALL'
+        create: yes
+        validate: 'visudo -cf %s'
+    - name: Add my user
+      user:
+        name: alan
+        state: present
+        append: yes
+        groups:
+          - adm
+          - audio
+          - cdrom
+          - dialout
+          - games
+          - gpio
+          - i2c
+          - input
+          - netdev
+          - plugdev
+          - spi
+          - sudo
+          - users
+          - video
+    - name: Add SSH key to my user
+      authorized_key:
+        user: alan
+        state: present
+        key: "{{ lookup('file', '/home/alan/git/ssh_keys/id_personal.pub') }}"
+    - name: Kill Pis running processes
+      remote_user: alan
+      shell: kill -9 $(ps -eo pid,user,comm | awk '/pi/ { print $1; }')
+    - name: Remove Pi user
+      remote_user: alan
+      user:
+        name: pi
+        state: absent
+        remove: yes
+# }}}
+
+# Install SSM Agent {{{
+- name: Install SSM Agent
+  hosts: sb-emon
+  tags: ssm-agent
+  become: yes
+  tasks:
+    - name: Install awscli
+      apt:
+        name: awscli
+        state: latest
+    - name: Install SSM agent
+      apt:
+        deb: https://s3.eu-west-1.amazonaws.com/amazon-ssm-eu-west-1/latest/debian_arm/amazon-ssm-agent.deb 
+# }}}
+
+# {{{ Setup Avahi
+- hosts: sb-emon
+  become: yes
+  tasks:
+    - name: Setup avahi
+      apt:
+        name:
+          - avahi-daemon
+          - avahi-discover
+          - libnss-mdns
+        state: present
+# }}}
+
+# {{{ Setup PowerScraper
+- name: Setup PowerScraper
+  hosts: sb-emon
+  tags: powerscraper
+  become: yes
+  tasks:
+    - name: Install pip
+      apt:
+        name: python3-pip
+        state: latest
+    - name: Install pip dependencies
+      pip:
+        executable: pip3
+        name:
+          - click
+          - pymodbus
+          - prompt_toolkit
+          - toml
+          - twisted
+    - name: Ensure git is installed
+      apt:
+        name: git
+        state: latest
+    - name: Get PowerScraper
+      git:
+        repo: 'https://github.com/InfernoEmbedded/PowerScraper.git'
+        dest: /opt/powerscraper
+# }}}
