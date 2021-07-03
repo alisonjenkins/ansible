@@ -4,6 +4,10 @@ all:
       ansible_host: 192.168.1.1
       ansible_user: alan
 
+    retropie:
+      ansible_host: 192.168.1.15
+      ansible_user: pi
+
     alan-desktop:
       ansible_connection: local
       gamemode_overclock: true
