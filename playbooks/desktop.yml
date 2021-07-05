@@ -276,6 +276,16 @@
         # - xboxdrv
         # - sddm
         # - appimage-git
+        # - docker-compose
+        # - lib32-nvidia-utils
+        # - mailwizard-git
+        # - nvidia-dkms
+        # - nvidia-settings
+        # - nvidia-utils
+        # - otf-fira-code
+        # - pulseaudio-modules-bt-git
+        # - task
+        # - unace
         - arandr
         - aria2
         - asciinema
@@ -301,7 +311,6 @@
         - dmenu
         - dmidecode
         - dnsmasq
-        # - docker-compose
         - dunst
         - dzen2
         - ethtool
@@ -336,7 +345,6 @@
         - keybase-gui
         - kitty
         - lib32-gamemode
-        # - lib32-nvidia-utils
         - lib32-vulkan-icd-loader
         - lib32-vulkan-intel
         - libinput-gestures
@@ -347,7 +355,6 @@
         - lshw
         - lutris
         - ly-git
-        # - mailwizard-git
         - mariadb-clients
         - mkinitcpio-systemd-tool
         - mpv
@@ -358,9 +365,6 @@
         - nethogs
         - nmap
         - npm
-        # - nvidia-dkms
-        # - nvidia-settings
-        # - nvidia-utils
         - nvme-cli
         - obs-studio
         - openttd
@@ -368,7 +372,6 @@
         - openttd-openmsx
         - openttd-opensfx
         - opus-tools
-        # - otf-fira-code
         - otf-font-awesome
         - ovmf
         - p7zip
@@ -388,7 +391,6 @@
         - powerline-fonts
         - powershell-bin
         - pulseaudio-alsa
-        # - pulseaudio-modules-bt-git
         - pv
         - pwgen
         - python-pynvim
@@ -412,7 +414,6 @@
         - swagger-editor-git
         - sway
         - sxiv
-        # - task
         - tflint
         - the_silver_searcher
         - thunar
@@ -425,7 +426,6 @@
         - ttf-droid
         - ttf-unifont
         - uhk-agent-appimage
-        # - unace
         - unbound
         - unigine-heaven
         - unrar
