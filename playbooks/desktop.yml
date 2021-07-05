@@ -349,6 +349,7 @@
         - ly-git
         # - mailwizard-git
         - mariadb-clients
+        - mkinitcpio-systemd-tool
         - mpv
         - multimc-git
         - nbtexplorer

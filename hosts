@@ -40,6 +40,8 @@ all:
         - filesystems
         - keyboard
         - fsck
+        - systemd
+        - systemd-tool
 
     alan-laptop:
       global_environment_variables:
