@@ -586,13 +586,13 @@
           owner: ali
           group: ali
 
-  - name: Mount media SMB share
-    ansible.posix.mount:
-      src: //tower.lan/media
-      path: /mnt/media
-      opts: _netdev,credentials=/etc/samba/credentials/tower,iocharset=utf8,rw,uid=1000,gid=1000
-      state: mounted
-      fstype: cifs
+  # - name: Mount media SMB share
+  #   ansible.posix.mount:
+  #     src: //tower.lan/media
+  #     path: /mnt/media
+  #     opts: _netdev,credentials=/etc/samba/credentials/tower,iocharset=utf8,rw,uid=1000,gid=1000
+  #     state: mounted
+  #     fstype: cifs
 
       # - git:
       #     accept_hostkey: yes
