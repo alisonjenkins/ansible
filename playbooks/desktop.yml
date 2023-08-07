@@ -248,8 +248,8 @@
             - name: NTP initial sync
               shell: "if ! /usr/bin/timedatectl status | /usr/bin/grep 'NTP synchronized: yes'; then /usr/bin/timedatectl set-ntp true; fi"
         - user:
-            name: 'alan'
-            comment: 'Alan Jenkins'
+            name: 'ali'
+            comment: 'Alison Jenkins'
             groups: docker,sys,wheel,audio
             append: yes
         - name: Install connman aur packages
@@ -556,36 +556,36 @@
     block:
       - file:
           state: directory
-          path: /home/alan/.gnupg
+          path: /home/ali/.gnupg
           mode: 0700
-          owner: alan
-          group: alan
+          owner: ali
+          group: ali
         become: yes
-        become_user: alan
+        become_user: ali
       # - command: "chezmoi init {{ dotfiles_repo }}"
       #   become: yes
-      #   become_user: alan
-      - name: Get uid of alan user
+      #   become_user: ali
+      - name: Get uid of ali user
         become: false
-        local_action: command id -u alan
-        register: alan_uid
+        local_action: command id -u ali
+        register: ali_uid
       - file:
           state: link
-          src: "/run/user/{{ alan_uid.stdout }}/keybase/kbfs/private/ajenkins/ssh_keys"
-          path: /home/alan/git/ssh_keys
+          src: "/run/user/{{ ali_uid.stdout }}/keybase/kbfs/private/ajenkins/ssh_keys"
+          path: /home/ali/git/ssh_keys
           force: yes
           mode: 0700
-          owner: alan
-          group: alan
+          owner: ali
+          group: ali
       - file:
           state: link
-          src: "/run/user/{{ alan_uid.stdout }}/keybase/kbfs/private/ajenkins/pass-password-store"
-          path: /home/alan/.password-store
+          src: "/run/user/{{ ali_uid.stdout }}/keybase/kbfs/private/ajenkins/pass-password-store"
+          path: /home/ali/.password-store
           force: yes
           mode: 0700
-          owner: alan
-          group: alan
-  
+          owner: ali
+          group: ali
+
   - name: Mount media SMB share
     ansible.posix.mount:
       src: //tower.lan/media
@@ -597,8 +597,8 @@
       # - git:
       #     accept_hostkey: yes
       #     depth: 1
-      #     dest: /home/alan/git/dotfiles
-      #     repo: https://gitlab.com/alanjjenkins/dotfiles.git
+      #     dest: /home/ali/git/dotfiles
+      #     repo: https://gitlab.com/alijjenkins/dotfiles.git
   handlers:
     - name: Restart connman
       service:
