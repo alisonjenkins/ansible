@@ -306,6 +306,7 @@
               # - swagger-editor-git
               # - task
               # - unace
+              # - uvesafb-dkms-git
               # - xboxdrv
               - arandr
               - aria2
@@ -446,7 +447,6 @@
               - unbound
               - unigine-heaven
               - unrar
-              # - uvesafb-dkms-git
               - vagrant
               - virt-manager
               - virtualbox
