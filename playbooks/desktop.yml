@@ -77,7 +77,6 @@
         - name: ensure the 'paru' aur helper is installed
           kewlfft.aur.aur:
             name: paru
-            skip_installed: true
             use: makepkg
           become: yes
           become_user: aur_builder
@@ -174,7 +173,6 @@
         - name: Install NetworkManager
           kewlfft.aur.aur:
             name: "{{ item }}"
-            skip_installed: true
           become: yes
           become_user: aur_builder
           with_items:
@@ -256,7 +254,6 @@
         - name: Install connman aur packages
           kewlfft.aur.aur:
             name: "{{ item }}"
-            skip_installed: true
           become: yes
           become_user: aur_builder
           with_items:
@@ -269,7 +266,6 @@
           tags: install_packages
           kewlfft.aur.aur:
             name: "{{ item }}"
-            skip_installed: true
           with_items:
             # - cloud-print-connector-git
             # - howdy
