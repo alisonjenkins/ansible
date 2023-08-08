@@ -139,7 +139,6 @@
               - openvpn
               - pkgfile
               - python-pip
-              - python2-pip
               - ranger
               - rsync
               - tmux
