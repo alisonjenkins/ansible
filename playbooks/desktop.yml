@@ -267,8 +267,8 @@
                 line: "FallbackNTP=0.pool.ntp.org 1.pool.ntp.org 0.fr.pool.ntp.org"
                 regexp: "^FallbackNTP="
               notify: reload systemd-timesyncd
-            - name: NTP initial sync
-              shell: "if ! /usr/bin/timedatectl status | /usr/bin/grep 'NTP synchronized: yes'; then /usr/bin/timedatectl set-ntp true; fi"
+            # - name: NTP initial sync
+            #   shell: "if ! /usr/bin/timedatectl status | /usr/bin/grep 'NTP synchronized: yes'; then /usr/bin/timedatectl set-ntp true; fi"
         - user:
             name: "ali"
             comment: "Alison Jenkins"
