@@ -303,6 +303,7 @@
               # - sddm
               # - stressapptest
               # - swagger-codegen
+              # - swagger-editor-git
               # - task
               # - unace
               # - xboxdrv
@@ -428,7 +429,6 @@
               - steam-native-runtime
               - strace
               - stress
-              - swagger-editor-git
               - sway
               - sxiv
               - tflint
