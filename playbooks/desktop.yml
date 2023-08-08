@@ -23,7 +23,7 @@
       file:
         dest: /home/aur_builder
         owner: aur_builder
-        group: aur_builder
+        group: wheel
         mode: 0775
         recurse: yes
 
