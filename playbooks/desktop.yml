@@ -74,9 +74,9 @@
                 block: |
                   [multilib]
                   Include = /etc/pacman.d/mirrorlist
-        - name: ensure the 'yay' aur helper is installed
+        - name: ensure the 'paru' aur helper is installed
           aur:
-            name: yay
+            name: paru
             skip_installed: true
             use: makepkg
           become: yes
