@@ -28,18 +28,18 @@
             state: present
             line: "PKGEXT='.pkg.tar.zst'"
             regexp: "^PKGEXT="
-        - name: set C compiler flags
-          lineinfile:
-            path: /etc/makepkg.conf
-            state: present
-            line: 'CFLAGS="-march=native -O2 -pipe -fstack-protector-strong"'
-            regexp: "^CFLAGS="
-        - name: set C++ compiler flags
-          lineinfile:
-            path: /etc/makepkg.conf
-            state: present
-            line: 'CXXFLAGS="${CFLAGS}"'
-            regexp: "^CXXFLAGS="
+        # - name: set C compiler flags
+        #   lineinfile:
+        #     path: /etc/makepkg.conf
+        #     state: present
+        #     line: 'CFLAGS="-march=native -O2 -pipe -fstack-protector-strong"'
+        #     regexp: "^CFLAGS="
+        # - name: set C++ compiler flags
+        #   lineinfile:
+        #     path: /etc/makepkg.conf
+        #     state: present
+        #     line: 'CXXFLAGS="${CFLAGS}"'
+        #     regexp: "^CXXFLAGS="
         - name: set makepkg options
           lineinfile:
             path: /etc/makepkg.conf
@@ -62,10 +62,10 @@
           package:
             name: aria2
             state: present
-        # - name: ensure ccache is installed
-        #   package:
-        #     name: ccache
-        #     state: present
+        - name: ensure ccache is installed
+          package:
+            name: ccache
+            state: present
         - name: Enable Arch multilib repo
           block:
             - blockinfile:
