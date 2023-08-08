@@ -307,6 +307,7 @@
               # - task
               # - unace
               # - uvesafb-dkms-git
+              # - wireshark-git
               # - xboxdrv
               - arandr
               - aria2
@@ -459,7 +460,6 @@
               - winetricks
               - wireguard-dkms
               - wireguard-tools
-              - wireshark-git
               - xclip
               - xorg-fonts-misc
               - xorg-server-xephyr
