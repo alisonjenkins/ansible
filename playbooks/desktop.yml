@@ -75,7 +75,7 @@
                   [multilib]
                   Include = /etc/pacman.d/mirrorlist
         - name: ensure the 'paru' aur helper is installed
-          aur:
+          kewlfft.aur.aur:
             name: paru
             skip_installed: true
             use: makepkg
@@ -172,7 +172,7 @@
           when: use_connman is defined
 
         - name: Install NetworkManager
-          aur:
+          kewlfft.aur.aur:
             name: "{{ item }}"
             skip_installed: true
           become: yes
@@ -254,7 +254,7 @@
             groups: docker,sys,wheel,audio
             append: yes
         - name: Install connman aur packages
-          aur:
+          kewlfft.aur.aur:
             name: "{{ item }}"
             skip_installed: true
           become: yes
@@ -267,7 +267,7 @@
 
         - name: Setup desktop packages
           tags: install_packages
-          aur:
+          kewlfft.aur.aur:
             name: "{{ item }}"
             skip_installed: true
           with_items:
