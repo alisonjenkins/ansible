@@ -288,13 +288,10 @@
           tags: install_packages
           kewlfft.aur.aur:
             name:
-              # - cloud-print-connector-git
-              # - howdy
-              # - swagger-codegen
-              # - xboxdrv
-              # - sddm
               # - appimage-git
+              # - cloud-print-connector-git
               # - docker-compose
+              # - howdy
               # - lib32-nvidia-utils
               # - mailwizard-git
               # - nvidia-dkms
@@ -302,8 +299,11 @@
               # - nvidia-utils
               # - otf-fira-code
               # - pulseaudio-modules-bt-git
+              # - sddm
+              # - swagger-codegen
               # - task
               # - unace
+              # - xboxdrv
               - arandr
               - aria2
               - asciinema
@@ -392,6 +392,7 @@
               - p7zip
               - packer
               - pacman-contrib
+              - pass
               - pass
               - pavucontrol
               - pidgin
