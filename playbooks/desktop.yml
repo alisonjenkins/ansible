@@ -373,7 +373,6 @@
               - mariadb-clients
               - mkinitcpio-systemd-tool
               - mpv
-              - multimc-git
               - nbtexplorer
               - ncdu
               - neovim
@@ -406,6 +405,7 @@
               - postman-bin
               - powerline-fonts
               - powershell-bin
+              - prism-launcher
               - pulseaudio-alsa
               - pv
               - pwgen
