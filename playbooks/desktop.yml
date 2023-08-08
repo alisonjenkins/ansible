@@ -19,6 +19,14 @@
         mode: 0644
         validate: "visudo -cf %s"
 
+    - name: Ensure aur_builder own's it's home directory recursively
+      file:
+        dest: /home/aur_builder
+        owner: aur_builder
+        group: aur_builder
+        mode: 0775
+        recurse: yes
+
     - name: install ansible requirements
       command: ansible-galaxy collection install -r /etc/ansible/requirements.yml
     - name: Arch tweaks
