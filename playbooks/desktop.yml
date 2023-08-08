@@ -357,7 +357,6 @@
               - jq
               - jupyter-notebook
               - kdenlive
-              - keepassx
               - keybase-gui
               - kitty
               - lib32-gamemode
