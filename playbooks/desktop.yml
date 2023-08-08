@@ -118,11 +118,11 @@
                 dest: /etc/sudoers.d/wheel_sudo
                 src: "{{playbook_dir}}/../files/sudoers/wheel_sudo"
                 validate: "visudo -cf %s"
-            - name: power control for sudo group
-              copy:
-                dest: /etc/sudoers.d/power_commands
-                src: "{{playbook_dir}}/../files/sudoers/power_commands"
-                validate: "visudo -cf %s"
+            # - name: power control for sudo group
+            #   copy:
+            #     dest: /etc/sudoers.d/power_commands
+            #     src: "{{playbook_dir}}/../files/sudoers/power_commands"
+            #     validate: "visudo -cf %s"
         - name: Install base packages
           package:
             name: "{{ item }}"
