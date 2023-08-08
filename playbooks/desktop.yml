@@ -294,6 +294,7 @@
               # - howdy
               # - lib32-nvidia-utils
               # - mailwizard-git
+              # - nbtexplorer
               # - nvidia-dkms
               # - nvidia-settings
               # - nvidia-utils
@@ -373,7 +374,6 @@
               - mariadb-clients
               - mkinitcpio-systemd-tool
               - mpv
-              - nbtexplorer
               - ncdu
               - neovim
               - nethogs
@@ -405,7 +405,7 @@
               - postman-bin
               - powerline-fonts
               - powershell-bin
-              - prism-launcher
+              - prismlauncher
               - pulseaudio-alsa
               - pv
               - pwgen
