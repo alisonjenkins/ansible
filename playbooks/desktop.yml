@@ -301,6 +301,7 @@
               # - otf-fira-code
               # - pulseaudio-modules-bt-git
               # - sddm
+              # - stressapptest
               # - swagger-codegen
               # - task
               # - unace
@@ -426,7 +427,7 @@
               - steam
               - steam-native-runtime
               - strace
-              - stressapptest
+              - stress
               - swagger-editor-git
               - sway
               - sxiv
