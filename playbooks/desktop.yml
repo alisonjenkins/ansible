@@ -245,9 +245,13 @@
         - name: Setup NTP
           block:
             - name: Set timezone
-              command: timedatectl set-timezone Europe/London
-              args:
-                creates: /etc/localtime
+              file:
+                src: /usr/share/zoneinfo/Europe/London
+                dest: /etc/localtime
+                owner: root
+                group: root
+                mode: 0774
+                state: link
               notify: reload systemd-timesyncd
             - name: NTP config
               lineinfile:
