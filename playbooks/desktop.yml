@@ -446,7 +446,7 @@
               - unbound
               - unigine-heaven
               - unrar
-              - uvesafb-dkms-git
+              # - uvesafb-dkms-git
               - vagrant
               - virt-manager
               - virtualbox
@@ -514,13 +514,13 @@
       #     group: root
       #     mode: 0664
       #   notify: NetworkManager restart
-    - name: Configure uvesafb
-      template:
-        src: "{{playbook_dir}}/../templates/uvesafb.conf.j2"
-        dest: /usr/lib/modprobe.d/uvesafb.conf
-        owner: root
-        group: root
-        mode: 0664
+    # - name: Configure uvesafb
+    #   template:
+    #     src: "{{playbook_dir}}/../templates/uvesafb.conf.j2"
+    #     dest: /usr/lib/modprobe.d/uvesafb.conf
+    #     owner: root
+    #     group: root
+    #     mode: 0664
 
     - name: Configure gamemode
       template:
