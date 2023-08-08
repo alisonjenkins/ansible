@@ -144,6 +144,8 @@
               - rsync
               - tmux
               - ufw
+          become: yes
+          become_user: aur_builder
 
         - name: Enable UFW
           become: true
