@@ -351,6 +351,7 @@
               - go
               - graphviz
               - handbrake
+              - hyprland-git
               - i3-gaps
               - i3blocks
               - i3status
@@ -361,6 +362,7 @@
               - jdk8-openjdk
               - jq
               - jupyter-notebook
+              - kde-applications
               - kdenlive
               - keybase-gui
               - kitty
@@ -402,6 +404,8 @@
               - pigz
               - piper
               - pitivi
+              - plasma
+              - plasma-wayland-session
               - playerctl
               - plymouth-git
               - podman
