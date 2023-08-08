@@ -124,27 +124,26 @@
             #     src: "{{playbook_dir}}/../files/sudoers/power_commands"
             #     validate: "visudo -cf %s"
         - name: Install base packages
-          package:
-            name: "{{ item }}"
+          kewlfft.aur.aur:
             state: present
-          with_items:
-            - augeas
-            - bash-completion
-            - bluez
-            - docker
-            - git
-            - htop
-            - iwd
-            - moreutils
-            - ncdu
-            - openvpn
-            - pkgfile
-            - python-pip
-            - python2-pip
-            - ranger
-            - rsync
-            - tmux
-            - ufw
+            name:
+              - augeas
+              - bash-completion
+              - bluez
+              - docker
+              - git
+              - htop
+              - iwd
+              - moreutils
+              - ncdu
+              - openvpn
+              - pkgfile
+              - python-pip
+              - python2-pip
+              - ranger
+              - rsync
+              - tmux
+              - ufw
 
         - name: Enable UFW
           become: true
@@ -191,18 +190,17 @@
 
         - name: Install NetworkManager
           kewlfft.aur.aur:
-            name: "{{ item }}"
+            name:
+              - network-manager-sstp
+              - networkmanager
+              - networkmanager-openconnect
+              - networkmanager-openvpn
+              - networkmanager-pptp
+              - networkmanager-vpnc
+              - nm-connection-editor
+              - network-manager-applet
           become: yes
           become_user: aur_builder
-          with_items:
-            - network-manager-sstp
-            - networkmanager
-            - networkmanager-openconnect
-            - networkmanager-openvpn
-            - networkmanager-pptp
-            - networkmanager-vpnc
-            - nm-connection-editor
-            - network-manager-applet
           when: use_network_manager is defined
 
         - name: Enable network manager
@@ -272,210 +270,208 @@
             append: yes
         - name: Install connman aur packages
           kewlfft.aur.aur:
-            name: "{{ item }}"
+            name:
+              - connman-gtk
+              - connman-ncurses
+              - connman_dmenu-git
           become: yes
           become_user: aur_builder
-          with_items:
-            - connman-gtk
-            - connman-ncurses
-            - connman_dmenu-git
           when: use_connman is defined
 
         - name: Setup desktop packages
           tags: install_packages
           kewlfft.aur.aur:
-            name: "{{ item }}"
-          with_items:
-            # - cloud-print-connector-git
-            # - howdy
-            # - swagger-codegen
-            # - xboxdrv
-            # - sddm
-            # - appimage-git
-            # - docker-compose
-            # - lib32-nvidia-utils
-            # - mailwizard-git
-            # - nvidia-dkms
-            # - nvidia-settings
-            # - nvidia-utils
-            # - otf-fira-code
-            # - pulseaudio-modules-bt-git
-            # - task
-            # - unace
-            - arandr
-            - aria2
-            - asciinema
-            - at
-            - augeas
-            - awesome-terminal-fonts
-            - aws-cli
-            - betterlockscreen
-            - bind-tools
-            - blueman
-            - bluez
-            - bzip2
-            - chezmoi
-            - chromium
-            - chromium-widevine
-            - cksfv
-            - cmus
-            - compton
-            - ctags
-            - deluge
-            - direnv
-            - discord
-            - dmenu
-            - dmidecode
-            - dnsmasq
-            - dunst
-            - dzen2
-            - ethtool
-            - evince
-            - exa
-            - exfat-utils
-            - feh
-            - file-roller
-            - firefox
-            - fortune-mod
-            - freemind
-            - gamemode
-            - geekbench
-            - gimp
-            - gitahead-bin
-            - go
-            - graphviz
-            - handbrake
-            - i3-gaps
-            - i3blocks
-            - i3blocks-contrib-git
-            - i3status
-            - inkscape
-            - intel-ucode
-            - iotop
-            - irqbalance
-            - jdk8-openjdk
-            - jq
-            - jupyter-notebook
-            - kdenlive
-            - keepassx
-            - keybase-gui
-            - kitty
-            - lib32-gamemode
-            - lib32-vulkan-icd-loader
-            - lib32-vulkan-intel
-            - libinput-gestures
-            - libreoffice-fresh-en-gb
-            - libva-intel-driver
-            - lnav
-            - lrzip
-            - lshw
-            - lutris
-            - ly-git
-            - mariadb-clients
-            - mkinitcpio-systemd-tool
-            - mpv
-            - multimc-git
-            - nbtexplorer
-            - ncdu
-            - neovim
-            - nethogs
-            - nmap
-            - npm
-            - nvme-cli
-            - obs-studio
-            - openttd
-            - openttd-opengfx
-            - openttd-openmsx
-            - openttd-opensfx
-            - opus-tools
-            - otf-font-awesome
-            - ovmf
-            - p7zip
-            - packer
-            - pacman-contrib
-            - pass
-            - pavucontrol
-            - pidgin
-            - pigz
-            - piper
-            - pitivi
-            - playerctl
-            - plymouth-git
-            - podman
-            - polybar
-            - postman-bin
-            - powerline-fonts
-            - powershell-bin
-            - pulseaudio-alsa
-            - pv
-            - pwgen
-            - python-pynvim
-            - qemu
-            - qemu-arch-extra
-            - qterminal
-            - reflector
-            - ripgrep
-            - rng-tools
-            - rofi
-            - samba
-            - seahorse
-            - shellcheck
-            - slack-desktop
-            - squashfs-tools
-            - sshuttle
-            - steam
-            - steam-native-runtime
-            - strace
-            - stressapptest
-            - swagger-editor-git
-            - sway
-            - sxiv
-            - tflint
-            - the_silver_searcher
-            - thunar
-            - thunar-archive-plugin
-            - thunar-media-tags-plugin
-            - thunar-volman
-            - tig
-            - tlp
-            - tmux
-            - ttf-droid
-            - ttf-unifont
-            - uhk-agent-appimage
-            - unbound
-            - unigine-heaven
-            - unrar
-            - uvesafb-dkms
-            - vagrant
-            - virt-manager
-            - virtualbox
-            - virtualbox-host-dkms
-            - vlc
-            - vulkan-icd-loader
-            - vulkan-intel
-            - vulkan-tools
-            - waybar
-            - winetricks
-            - wireguard-dkms
-            - wireguard-tools
-            - wireshark-git
-            - xclip
-            - xorg-fonts-misc
-            - xorg-server-xephyr
-            - xorg-server-xwayland
-            - xorg-xev
-            - xorg-xkill
-            - xorg-xmodmap
-            - xorg-xprop
-            - xorg-xrandr
-            - xorg-xrdb
-            - xpadneo-dkms-git
-            - xsane
-            - xscreensaver
-            - xsel
-            - xss-lock
-            - yarn
-            - zramswap
+            name:
+              # - cloud-print-connector-git
+              # - howdy
+              # - swagger-codegen
+              # - xboxdrv
+              # - sddm
+              # - appimage-git
+              # - docker-compose
+              # - lib32-nvidia-utils
+              # - mailwizard-git
+              # - nvidia-dkms
+              # - nvidia-settings
+              # - nvidia-utils
+              # - otf-fira-code
+              # - pulseaudio-modules-bt-git
+              # - task
+              # - unace
+              - arandr
+              - aria2
+              - asciinema
+              - at
+              - augeas
+              - awesome-terminal-fonts
+              - aws-cli
+              - betterlockscreen
+              - bind-tools
+              - blueman
+              - bluez
+              - bzip2
+              - chezmoi
+              - chromium
+              - chromium-widevine
+              - cksfv
+              - cmus
+              - compton
+              - ctags
+              - deluge
+              - direnv
+              - discord
+              - dmenu
+              - dmidecode
+              - dnsmasq
+              - dunst
+              - dzen2
+              - ethtool
+              - evince
+              - exa
+              - exfat-utils
+              - feh
+              - file-roller
+              - firefox
+              - fortune-mod
+              - freemind
+              - gamemode
+              - geekbench
+              - gimp
+              - gitahead-bin
+              - go
+              - graphviz
+              - handbrake
+              - i3-gaps
+              - i3blocks
+              - i3blocks-contrib-git
+              - i3status
+              - inkscape
+              - intel-ucode
+              - iotop
+              - irqbalance
+              - jdk8-openjdk
+              - jq
+              - jupyter-notebook
+              - kdenlive
+              - keepassx
+              - keybase-gui
+              - kitty
+              - lib32-gamemode
+              - lib32-vulkan-icd-loader
+              - lib32-vulkan-intel
+              - libinput-gestures
+              - libreoffice-fresh-en-gb
+              - libva-intel-driver
+              - lnav
+              - lrzip
+              - lshw
+              - lutris
+              - ly-git
+              - mariadb-clients
+              - mkinitcpio-systemd-tool
+              - mpv
+              - multimc-git
+              - nbtexplorer
+              - ncdu
+              - neovim
+              - nethogs
+              - nmap
+              - npm
+              - nvme-cli
+              - obs-studio
+              - openttd
+              - openttd-opengfx
+              - openttd-openmsx
+              - openttd-opensfx
+              - opus-tools
+              - otf-font-awesome
+              - ovmf
+              - p7zip
+              - packer
+              - pacman-contrib
+              - pass
+              - pavucontrol
+              - pidgin
+              - pigz
+              - piper
+              - pitivi
+              - playerctl
+              - plymouth-git
+              - podman
+              - polybar
+              - postman-bin
+              - powerline-fonts
+              - powershell-bin
+              - pulseaudio-alsa
+              - pv
+              - pwgen
+              - python-pynvim
+              - qemu
+              - qemu-arch-extra
+              - qterminal
+              - reflector
+              - ripgrep
+              - rng-tools
+              - rofi
+              - samba
+              - seahorse
+              - shellcheck
+              - slack-desktop
+              - squashfs-tools
+              - sshuttle
+              - steam
+              - steam-native-runtime
+              - strace
+              - stressapptest
+              - swagger-editor-git
+              - sway
+              - sxiv
+              - tflint
+              - the_silver_searcher
+              - thunar
+              - thunar-archive-plugin
+              - thunar-media-tags-plugin
+              - thunar-volman
+              - tig
+              - tlp
+              - tmux
+              - ttf-droid
+              - ttf-unifont
+              - uhk-agent-appimage
+              - unbound
+              - unigine-heaven
+              - unrar
+              - uvesafb-dkms
+              - vagrant
+              - virt-manager
+              - virtualbox
+              - virtualbox-host-dkms
+              - vlc
+              - vulkan-icd-loader
+              - vulkan-intel
+              - vulkan-tools
+              - waybar
+              - winetricks
+              - wireguard-dkms
+              - wireguard-tools
+              - wireshark-git
+              - xclip
+              - xorg-fonts-misc
+              - xorg-server-xephyr
+              - xorg-server-xwayland
+              - xorg-xev
+              - xorg-xkill
+              - xorg-xmodmap
+              - xorg-xprop
+              - xorg-xrandr
+              - xorg-xrdb
+              - xpadneo-dkms-git
+              - xsane
+              - xscreensaver
+              - xsel
+              - xss-lock
+              - yarn
+              - zramswap
           become: yes
           become_user: aur_builder
 
