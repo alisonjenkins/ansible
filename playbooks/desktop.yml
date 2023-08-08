@@ -212,6 +212,7 @@
 
         - name: Generate initial pkgfile db
           command: /usr/bin/pkgfile -u
+          ignore_errors: true
           args:
             creates: /var/cache/pkgfile/core.files
         - name: Create systemd-timer for updating pkfile db once per day
