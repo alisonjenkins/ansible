@@ -446,7 +446,7 @@
               - unbound
               - unigine-heaven
               - unrar
-              - uvesafb-dkms
+              - uvesafb-dkms-git
               - vagrant
               - virt-manager
               - virtualbox
