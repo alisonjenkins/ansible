@@ -568,39 +568,39 @@
         mode: 0644
       notify: create mkinitcpio
 
-    - name: Setup user dotfiles
-      block:
-        - file:
-            state: directory
-            path: /home/ali/.gnupg
-            mode: 0700
-            owner: ali
-            group: ali
-          become: yes
-          become_user: ali
-        # - command: "chezmoi init {{ dotfiles_repo }}"
-        #   become: yes
-        #   become_user: ali
-        - name: Get uid of ali user
-          become: false
-          local_action: command id -u ali
-          register: ali_uid
-        - file:
-            state: link
-            src: "/run/user/{{ ali_uid.stdout }}/keybase/kbfs/private/ajenkins/ssh_keys"
-            path: /home/ali/git/ssh_keys
-            force: yes
-            mode: 0700
-            owner: ali
-            group: ali
-        - file:
-            state: link
-            src: "/run/user/{{ ali_uid.stdout }}/keybase/kbfs/private/ajenkins/pass-password-store"
-            path: /home/ali/.password-store
-            force: yes
-            mode: 0700
-            owner: ali
-            group: ali
+    # - name: Setup user dotfiles
+    #   block:
+    #     - file:
+    #         state: directory
+    #         path: /home/ali/.gnupg
+    #         mode: 0700
+    #         owner: ali
+    #         group: ali
+    #       become: yes
+    #       become_user: ali
+    #     # - command: "chezmoi init {{ dotfiles_repo }}"
+    #     #   become: yes
+    #     #   become_user: ali
+    #     - name: Get uid of ali user
+    #       become: false
+    #       local_action: command id -u ali
+    #       register: ali_uid
+    #     - file:
+    #         state: link
+    #         src: "/run/user/{{ ali_uid.stdout }}/keybase/kbfs/private/ajenkins/ssh_keys"
+    #         path: /home/ali/git/ssh_keys
+    #         force: yes
+    #         mode: 0700
+    #         owner: ali
+    #         group: ali
+    #     - file:
+    #         state: link
+    #         src: "/run/user/{{ ali_uid.stdout }}/keybase/kbfs/private/ajenkins/pass-password-store"
+    #         path: /home/ali/.password-store
+    #         force: yes
+    #         mode: 0700
+    #         owner: ali
+    #         group: ali
 
   # - name: Mount media SMB share
   #   ansible.posix.mount:
