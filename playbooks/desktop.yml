@@ -150,8 +150,22 @@
               - python-pip
               - ranger
               - rsync
+              - systemd-efi-pacman-hook
               - tmux
               - ufw
+          become: yes
+          become_user: aur_builder
+          register: basepackagesresult
+          until: basepackagesresult is not failed
+          retries: 5
+          delay: 2
+
+        - name: Reinstall kernel packages (so they get copied to /efi)
+          kewlfft.aur.aur:
+            state: present
+            name:
+              - linux
+              - linux-zen
           become: yes
           become_user: aur_builder
           register: basepackagesresult
@@ -450,7 +464,6 @@
               - stress
               - sway
               - sxiv
-              - systemd-efi-pacman-hook
               - tflint
               - the_silver_searcher
               - thunar
