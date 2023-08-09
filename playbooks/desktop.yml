@@ -74,15 +74,16 @@
             line: 'MAKEFLAGS="-j {{ ansible_processor_cores * ansible_processor_threads_per_core }}"'
             regexp: "^MAKEFLAGS="
         - name: Ensure aria2 is installed
-          package:
+          community.general.pacman:
             name: aria2
             state: present
+            update_cache: true
         - name: ensure ccache is installed
-          package:
+          community.general.pacman:
             name: ccache
             state: present
         - name: Ensure rust is installed
-          package:
+          community.general.pacman:
             name: rust
             state: present
         - name: Enable Arch multilib repo
