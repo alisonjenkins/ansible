@@ -117,8 +117,6 @@
           with_items:
             - stable-x86_64-unknown-linux-gnu
             - stable-aarch64-unknown-linux-gnu
-            - wasm32-wasi
-            - wasm32-unknown-unknown
           register: rusttoolchaininstallresult
           until: rusttoolchaininstallresult is not failed
           retries: 5
