@@ -82,6 +82,7 @@
                   [multilib]
                   Include = /etc/pacman.d/mirrorlist
         - name: Update Pacman package cache
+          ignore_errors: false
           community.general.pacman:
             update_cache: true
         - name: Ensure aria2 is installed
