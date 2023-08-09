@@ -106,21 +106,29 @@
           delay: 2
         - name: Ensure rust is installed
           community.general.pacman:
-            name: rustup
+            name: rust
             state: present
           register: rustinstallresult
           until: rustinstallresult is not failed
           retries: 5
           delay: 2
-        - name: Ensure rust toolochains are installed
-          command: "rustup toolchain install {{item}}"
-          with_items:
-            - stable-x86_64-unknown-linux-gnu
-            - stable-aarch64-unknown-linux-gnu
-          register: rusttoolchaininstallresult
-          until: rusttoolchaininstallresult is not failed
-          retries: 5
-          delay: 2
+        # - name: Ensure rust is installed
+        #   community.general.pacman:
+        #     name: rustup
+        #     state: present
+        #   register: rustinstallresult
+        #   until: rustinstallresult is not failed
+        #   retries: 5
+        #   delay: 2
+        # - name: Ensure rust toolochains are installed
+        #   command: "rustup toolchain install {{item}}"
+        #   with_items:
+        #     - stable-x86_64-unknown-linux-gnu
+        #     - stable-aarch64-unknown-linux-gnu
+        #   register: rusttoolchaininstallresult
+        #   until: rusttoolchaininstallresult is not failed
+        #   retries: 5
+        #   delay: 2
         - name: ensure the 'paru' aur helper is installed
           kewlfft.aur.aur:
             name: paru
