@@ -486,6 +486,7 @@
               - slack-desktop
               - squashfs-tools
               - sshuttle
+              - starship
               - steam
               - steam-native-runtime
               - strace
