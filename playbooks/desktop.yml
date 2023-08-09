@@ -568,6 +568,11 @@
       service:
         name: sddm
         enabled: true
+
+    - name: Enable bluetooth service
+      service:
+        name: bluetooth
+        enabled: true
     # - name: Enable ly service
     #   service:
     #     name: ly
