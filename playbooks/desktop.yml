@@ -520,6 +520,7 @@
               - winetricks
               - wireguard-dkms
               - wireguard-tools
+              - wofi
               - xclip
               - xorg-fonts-misc
               - xorg-server-xephyr
