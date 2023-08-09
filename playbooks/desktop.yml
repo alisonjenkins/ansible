@@ -162,7 +162,7 @@
 
         - name: Reinstall kernel packages (so they get copied to /efi)
           kewlfft.aur.aur:
-            state: present
+            state: latest
             name:
               - linux
               - linux-zen
