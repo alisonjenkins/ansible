@@ -535,6 +535,14 @@
           retries: 5
           delay: 2
 
+    - name: Ensure sddm.conf.d exists
+      file:
+        state: directory
+        path: /etc/sddm.conf.d
+        owner: root
+        group: root
+        mode: 0775
+
     - name: Configure sddm wayland
       template:
         src: /etc/ansible/templates/sddm/10-wayland.conf
