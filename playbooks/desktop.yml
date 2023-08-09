@@ -412,7 +412,7 @@
               - plasma
               - plasma-wayland-session
               - playerctl
-              - plymouth-git
+              - plymouth
               - podman
               - polybar
               - postman-bin
