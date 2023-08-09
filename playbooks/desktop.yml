@@ -81,10 +81,15 @@
                 block: |
                   [multilib]
                   Include = /etc/pacman.d/mirrorlist
-        - name: Update Pacman package cache
-          ignore_errors: false
-          community.general.pacman:
-            update_cache: true
+        - name: Retry package cache update
+          tasks:
+            - name: Update Pacman package cache
+              community.general.pacman:
+                update_cache: true
+              register: cacheupdateresult
+              until: "cacheupdateresult is not failed"
+              retries: 5
+              delay: 2
         - name: Ensure aria2 is installed
           community.general.pacman:
             name: aria2
