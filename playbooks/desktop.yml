@@ -440,6 +440,7 @@
               - stress
               - sway
               - sxiv
+              - systemd-efi-pacman-hook
               - tflint
               - the_silver_searcher
               - thunar
