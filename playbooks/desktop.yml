@@ -99,9 +99,9 @@
             use: makepkg
           become: yes
           become_user: aur_builder
-        - name: make sure that vim is installed
+        - name: make sure that neovim is installed
           package:
-            name: gvim
+            name: neovim
             state: present
 
     - name: Install base system
