@@ -81,6 +81,9 @@
                 block: |
                   [multilib]
                   Include = /etc/pacman.d/mirrorlist
+        - name: Pause for 5 minutes to build app cache
+          ansible.builtin.pause:
+            seconds: 2
         - name: Update Pacman package cache
           community.general.pacman:
             update_cache: true
