@@ -519,6 +519,7 @@
               - winetricks
               - wireguard-dkms
               - wireguard-tools
+              - wl-clipboard
               - wofi
               - xclip
               - xorg-fonts-misc
