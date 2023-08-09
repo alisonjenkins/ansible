@@ -327,7 +327,6 @@
               # - nvidia-utils
               # - otf-fira-code
               # - pulseaudio-modules-bt-git
-              # - sddm
               # - stressapptest
               # - swagger-codegen
               # - swagger-editor-git
@@ -453,6 +452,7 @@
               - rng-tools
               - rofi
               - samba
+              - sddm
               - seahorse
               - shellcheck
               - slack-desktop
