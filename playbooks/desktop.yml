@@ -73,19 +73,6 @@
             state: present
             line: 'MAKEFLAGS="-j {{ ansible_processor_cores * ansible_processor_threads_per_core }}"'
             regexp: "^MAKEFLAGS="
-        - name: Ensure aria2 is installed
-          community.general.pacman:
-            name: aria2
-            state: present
-            update_cache: true
-        - name: ensure ccache is installed
-          community.general.pacman:
-            name: ccache
-            state: present
-        - name: Ensure rust is installed
-          community.general.pacman:
-            name: rust
-            state: present
         - name: Enable Arch multilib repo
           block:
             - blockinfile:
@@ -94,6 +81,21 @@
                 block: |
                   [multilib]
                   Include = /etc/pacman.d/mirrorlist
+        - name: Update Pacman package cache
+          community.general.pacman:
+            update_cache: true
+        - name: Ensure aria2 is installed
+          community.general.pacman:
+            name: aria2
+            state: present
+        - name: ensure ccache is installed
+          community.general.pacman:
+            name: ccache
+            state: present
+        - name: Ensure rust is installed
+          community.general.pacman:
+            name: rust
+            state: present
         - name: ensure the 'paru' aur helper is installed
           kewlfft.aur.aur:
             name: paru
@@ -104,7 +106,6 @@
           kewlfft.aur.aur:
             name: neovim
             use: paru
-            update_cache: true
           become: yes
           become_user: aur_builder
 
