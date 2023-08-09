@@ -355,7 +355,6 @@
               # - nvidia-settings
               # - nvidia-utils
               # - otf-fira-code
-              # - pulseaudio-modules-bt-git
               # - stressapptest
               # - swagger-codegen
               # - swagger-editor-git
@@ -376,6 +375,7 @@
               - bind-tools
               - blueman
               - bluez
+              - bluez-utils
               - bzip2
               - chezmoi
               - cksfv
@@ -422,6 +422,7 @@
               - keybase-gui
               - kitty
               - lib32-gamemode
+              - lib32-pipewire
               - lib32-vulkan-icd-loader
               - lib32-vulkan-intel
               - libinput-gestures
@@ -458,6 +459,11 @@
               - pidgin
               - pigz
               - piper
+              - pipewire
+              - pipewire-alsa
+              - pipewire-audio
+              - pipewire-jack
+              - pipewire-pulse
               - pitivi
               - plasma
               - plasma-wayland-session
@@ -469,12 +475,12 @@
               - powerline-fonts
               - powershell-bin
               - prismlauncher
-              - pulseaudio-alsa
               - pv
               - pwgen
               - python-pynvim
               - qemu
               - qemu-arch-extra
+              - qpwgraph
               - qterminal
               - reflector
               - ripgrep
@@ -521,9 +527,11 @@
               - winetricks
               - wireguard-dkms
               - wireguard-tools
+              - wireplumber
               - wl-clipboard
               - wofi
               - xclip
+              - xdg-desktop-portal
               - xorg-fonts-misc
               - xorg-server-xephyr
               - xorg-server-xwayland
