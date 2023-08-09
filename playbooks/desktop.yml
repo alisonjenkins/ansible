@@ -154,6 +154,10 @@
               - ufw
           become: yes
           become_user: aur_builder
+          register: basepackagesresult
+          until: basepackagesresult is not failed
+          retries: 5
+          delay: 2
 
         - name: Enable UFW
           become: true
@@ -493,6 +497,10 @@
               - zramswap
           become: yes
           become_user: aur_builder
+          register: desktoppackagesresult
+          until: desktoppackagesresult is not failed
+          retries: 5
+          delay: 2
 
     # - name: Enable sddm plymouth service
     #   service:
