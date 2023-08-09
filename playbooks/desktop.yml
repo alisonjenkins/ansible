@@ -364,6 +364,7 @@
               # - uvesafb-dkms-git
               # - wireshark-git
               # - xboxdrv
+              - alacritty
               - arandr
               - aria2
               - asciinema
