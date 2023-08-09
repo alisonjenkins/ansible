@@ -809,3 +809,5 @@
         - sysctl:
             name: vm.vfs_cache_pressure
             value: "50"
+    - debug:
+        msg: System installed please change the user password and reboot.
