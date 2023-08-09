@@ -538,6 +538,7 @@
               - xscreensaver
               - xsel
               - xss-lock
+              - xxd
               - yarn
               - zramswap
           become: yes
