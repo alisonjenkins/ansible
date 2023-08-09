@@ -25,16 +25,16 @@ all:
       # nvidia_xorg_dpms_blank_time: 30
       # uvesa_fb_resolution: 3440x1440-32
       mkinitcpio_hooks:
+        # - v86d
         - base
         - udev
-        - v86d
         - autodetect
         - modconf
         - block
         - keyboard
         - keymap
         - plymouth
-        - plymouth-encrypt
+        - encrypt
         - lvm2
         - resume
         - filesystems
