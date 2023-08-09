@@ -515,10 +515,10 @@
           retries: 5
           delay: 2
 
-    # - name: Enable sddm plymouth service
-    #   service:
-    #     name: sddm-plymouth
-    #     enabled: true
+    - name: Enable sddm plymouth service
+      service:
+        name: sddm
+        enabled: true
     # - name: Enable ly service
     #   service:
     #     name: ly
