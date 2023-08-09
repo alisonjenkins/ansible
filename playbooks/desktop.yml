@@ -93,6 +93,9 @@
                 block: |
                   [multilib]
                   Include = /etc/pacman.d/mirrorlist
+        - name: Refresh Arch multilib repo
+          block:
+            - command: /usr/bin/pacman -Sy
         - name: ensure the 'paru' aur helper is installed
           kewlfft.aur.aur:
             name: paru
