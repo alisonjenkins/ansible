@@ -592,6 +592,28 @@
       service:
         name: bluetooth
         enabled: true
+
+    - name: Enable sshd service
+      service:
+        name: sshd
+        enabled: true
+
+    - name: SSH - Disable password authentication
+      ansible.builtin.lineinfile:
+        path: /etc/ssh/sshd_config
+        regex: "^#?\s*PasswordAuthentication.*$"
+        line: "PasswordAuthentication no"
+        create: yes
+        mode: 0644
+
+    - name: SSH - Authentication methods
+      ansible.builtin.lineinfile:
+        path: /etc/ssh/sshd_config
+        regex: "^#?\s*AuthenticationMethods.*$"
+        line: "AuthenticationMethods publickey"
+        create: yes
+        mode: 0644
+
     # - name: Enable ly service
     #   service:
     #     name: ly
