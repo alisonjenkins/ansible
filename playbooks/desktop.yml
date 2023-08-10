@@ -614,6 +614,12 @@
         create: yes
         mode: 0644
 
+    - name: Setup SSH authorized_keys
+      ansible.posix.authorized_key:
+        user: ali
+        state: present
+        key: "{{ lookup('file', '/etc/ansible/files/ssh/id_personal.pub') }}"
+
     # - name: Enable ly service
     #   service:
     #     name: ly
