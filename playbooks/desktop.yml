@@ -431,9 +431,6 @@
               - graphviz
               - handbrake
               - hyprland-git
-              - i3-gaps
-              - i3blocks
-              - i3status
               - inkscape
               - intel-ucode
               - iotop
