@@ -349,19 +349,29 @@
           when: use_connman is defined
 
         - name: Setup pipewire
-          kewlfft.aur.aur:
-            name:
-              - pipewire
-              - pipewire-alsa
-              - pipewire-audio
-              - pipewire-jack
-              - pipewire-pulse
-          become: yes
-          become_user: aur_builder
-          register: pipewirepackagesresult
-          until: pipewirepackagesresult is not failed
-          retries: 20
-          delay: 2
+          block:
+            - kewlfft.aur.aur:
+                name:
+                  - wireplumber
+              become: yes
+              become_user: aur_builder
+              register: pipewirepackagesresult
+              until: pipewirepackagesresult is not failed
+              retries: 20
+              delay: 2
+            - kewlfft.aur.aur:
+                name:
+                  - pipewire
+                  - pipewire-alsa
+                  - pipewire-audio
+                  - pipewire-jack
+                  - pipewire-pulse
+              become: yes
+              become_user: aur_builder
+              register: pipewirepackagesresult
+              until: pipewirepackagesresult is not failed
+              retries: 20
+              delay: 2
 
         - name: Setup desktop packages
           tags: install_packages
@@ -544,7 +554,6 @@
               - winetricks
               - wireguard-dkms
               - wireguard-tools
-              - wireplumber
               - wl-clipboard
               - wofi
               - xclip
