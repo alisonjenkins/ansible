@@ -686,6 +686,14 @@
         name: rngd
         enabled: true
 
+    - name: Ensure systemd resolved.conf.d dir exists
+      file:
+        path: /etc/systemd/resolved.conf.d/
+        state: directory
+        owner: root
+        group: root
+        mode: 0755
+
     - name: Disable Systemd-Resolved MDNS
       template:
         src: /etc/ansible/templates/systemd-resolved/disable-mdns.conf
