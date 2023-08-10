@@ -564,7 +564,7 @@
           become_user: aur_builder
           register: desktoppackagesresult
           until: desktoppackagesresult is not failed
-          retries: 5
+          retries: 20
           delay: 2
 
     - name: Ensure sddm.conf.d exists
