@@ -671,7 +671,7 @@
         dest: /etc/systemd/resolved.conf.d/disable-mdns.conf
         owner: root
         group: root
-        mode 0644
+        mode: 0644
 
     - name: Enable avahi
       service:
