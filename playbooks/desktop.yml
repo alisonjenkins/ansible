@@ -673,9 +673,6 @@
         group: root
         mode 0644
 
-    # - name: Configure nsswitch
-    #
-
     - name: Enable avahi
       service:
         name: avahi-daemon
