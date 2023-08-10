@@ -373,6 +373,14 @@
               retries: 20
               delay: 2
 
+        - name: Setup snd_usb_audio modprobe options
+          ansible.builtin.template:
+            src: /etc/ansible/templates/modprobe/snd_usb_audio.conf
+            dest: /etc/modprobe.d/snd_usb_audio.conf
+            owner: root
+            group: root
+            mode: 0644
+
         - name: Setup desktop packages
           tags: install_packages
           kewlfft.aur.aur:
