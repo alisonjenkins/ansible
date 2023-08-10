@@ -583,7 +583,7 @@
         group: root
         mode: 0664
 
-    - name: Enable sddm plymouth service
+    - name: Enable sddm service
       service:
         name: sddm
         enabled: true
