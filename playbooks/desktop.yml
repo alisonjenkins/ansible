@@ -464,6 +464,7 @@
               - lutris
               - ly-git
               - mariadb-clients
+              - mesa-git
               - mkinitcpio-systemd-tool
               - mpv
               - ncdu
