@@ -601,7 +601,7 @@
     - name: SSH - Disable password authentication
       ansible.builtin.lineinfile:
         path: /etc/ssh/sshd_config
-        regex: "^#?\s*PasswordAuthentication.*$"
+        regex: '^#?\s*PasswordAuthentication.*$'
         line: "PasswordAuthentication no"
         create: yes
         mode: 0644
@@ -609,7 +609,7 @@
     - name: SSH - Authentication methods
       ansible.builtin.lineinfile:
         path: /etc/ssh/sshd_config
-        regex: "^#?\s*AuthenticationMethods.*$"
+        regex: '^#?\s*AuthenticationMethods.*$'
         line: "AuthenticationMethods publickey"
         create: yes
         mode: 0644
