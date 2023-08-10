@@ -377,6 +377,7 @@
               - asciinema
               - at
               - augeas
+              - avahi
               - awesome-terminal-fonts
               - aws-cli
               - betterlockscreen
@@ -449,8 +450,10 @@
               - nethogs
               - nmap
               - npm
+              - nss-mdns
               - nvme-cli
               - obs-studio
+              - openssh
               - openttd
               - openttd-opengfx
               - openttd-openmsx
@@ -638,6 +641,22 @@
     - name: Enable rngd
       service:
         name: rngd
+        enabled: true
+
+    - name: Disable Systemd-Resolved MDNS
+      template:
+        src: /etc/ansible/templates/systemd-resolved/disable-mdns.conf
+        dest: /etc/systemd/resolved.conf.d/disable-mdns.conf
+        owner: root
+        group: root
+        mode 0644
+
+    # - name: Configure nsswitch
+    #
+
+    - name: Enable avahi
+      service:
+        name: avahi-daemon
         enabled: true
 
       # - name: Set nvidia TDP - Create timer
