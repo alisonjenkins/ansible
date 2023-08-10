@@ -348,6 +348,21 @@
           become_user: aur_builder
           when: use_connman is defined
 
+        - name: Setup pipewire
+          kewlfft.aur.aur:
+            name:
+              - pipewire
+              - pipewire-alsa
+              - pipewire-audio
+              - pipewire-jack
+              - pipewire-pulse
+          become: yes
+          become_user: aur_builder
+          register: pipewirepackagesresult
+          until: pipewirepackagesresult is not failed
+          retries: 20
+          delay: 2
+
         - name: Setup desktop packages
           tags: install_packages
           kewlfft.aur.aur:
@@ -470,11 +485,6 @@
               - pidgin
               - pigz
               - piper
-              - pipewire
-              - pipewire-alsa
-              - pipewire-audio
-              - pipewire-jack
-              - pipewire-pulse
               - pitivi
               - plasma
               - plasma-wayland-session
