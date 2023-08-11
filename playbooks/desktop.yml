@@ -927,7 +927,7 @@
             accept_hostkey: yes
             depth: 1
             dest: /home/ali/git/stow-dotfiles
-            repo: git@github.com:alisonjenkins/stow-dotfiles.git
+            repo: https://github.com/alisonjenkins/stow-dotfiles.git
           become: yes
           become_user: ali
 
