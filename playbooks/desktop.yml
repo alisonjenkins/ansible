@@ -381,6 +381,17 @@
             group: root
             mode: 0644
 
+        - name: Install mesa-git
+          kewlfft.aur.aur:
+            name:
+              - mesa-git
+          become: yes
+          become_user: aur_builder
+          register: mesagitresult
+          until: mesagitresult is not failed
+          retries: 5
+          delay: 2
+
         - name: Setup desktop packages
           tags: install_packages
           kewlfft.aur.aur:
@@ -472,7 +483,6 @@
               - lutris
               - ly-git
               - mariadb-clients
-              - mesa-git
               - mkinitcpio-systemd-tool
               - mpv
               - ncdu
