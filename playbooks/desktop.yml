@@ -323,6 +323,7 @@
               - git
               - htop
               - iwd
+              - mkinitcpio-systemd-tool
               - moreutils
               - ncdu
               - openvpn
@@ -331,7 +332,6 @@
               - ranger
               - rsync
               - systemd-efi-pacman-hook
-              - mkinitcpio-systemd-tool
               - tmux
               - ufw
           become: yes
