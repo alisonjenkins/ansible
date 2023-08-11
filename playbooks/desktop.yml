@@ -331,6 +331,7 @@
               - ranger
               - rsync
               - systemd-efi-pacman-hook
+              - mkinitcpio-systemd-tool
               - tmux
               - ufw
           become: yes
@@ -626,7 +627,6 @@
               - lutris
               - ly-git
               - mariadb-clients
-              - mkinitcpio-systemd-tool
               - mpv
               - ncdu
               - neovim
