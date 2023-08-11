@@ -146,132 +146,164 @@
                 name: vm.vfs_cache_pressure
                 value: "50"
 
-    - name: Create the `aur_builder` user
-      become: yes
-      ansible.builtin.user:
-        name: aur_builder
-        create_home: yes
-        group: wheel
-
-    - name: Allow the `aur_builder` user to run `sudo pacman` without a password
-      become: yes
-      ansible.builtin.lineinfile:
-        path: /etc/sudoers.d/11-install-aur_builder
-        line: "aur_builder ALL=(ALL) NOPASSWD: /usr/bin/pacman"
-        create: yes
-        mode: 0644
-        validate: "visudo -cf %s"
-
-    - name: Ensure aur_builder own's it's home directory recursively
-      file:
-        dest: /home/aur_builder
-        owner: aur_builder
-        group: wheel
-        mode: 0775
-        recurse: yes
-
     - name: install ansible requirements
       command: ansible-galaxy collection install -r /etc/ansible/requirements.yml
+
     - name: Arch tweaks
       block:
-        - name: configure parallel package compression
-          lineinfile:
-            path: /etc/makepkg.conf
-            state: present
-            line: "COMPRESSXZ=(xz -c -z - --threads=0)"
-            regexp: "^COMPRESSXZ="
-        - name: configure zst package compression
-          lineinfile:
-            path: /etc/makepkg.conf
-            state: present
-            line: "PKGEXT='.pkg.tar.zst'"
-            regexp: "^PKGEXT="
-        # - name: set C compiler flags
-        #   lineinfile:
-        #     path: /etc/makepkg.conf
-        #     state: present
-        #     line: 'CFLAGS="-march=native -O2 -pipe -fstack-protector-strong"'
-        #     regexp: "^CFLAGS="
-        # - name: set C++ compiler flags
-        #   lineinfile:
-        #     path: /etc/makepkg.conf
-        #     state: present
-        #     line: 'CXXFLAGS="${CFLAGS}"'
-        #     regexp: "^CXXFLAGS="
-        - name: set makepkg options
-          lineinfile:
-            path: /etc/makepkg.conf
-            state: present
-            line: "OPTIONS=(strip docs !libtool !staticlibs emptydirs zipman purge !optipng !upx !debug)"
-            regexp: "^OPTIONS="
-        - name: set makepkg buildenv
-          lineinfile:
-            path: /etc/makepkg.conf
-            state: present
-            line: "BUILDENV=(!distcc color ccache check !sign)"
-            regexp: "^BUILDENV="
-        - name: setup parallel make jobs
-          lineinfile:
-            path: /etc/makepkg.conf
-            state: present
-            line: 'MAKEFLAGS="-j {{ ansible_processor_cores * ansible_processor_threads_per_core }}"'
-            regexp: "^MAKEFLAGS="
-        - name: Enable Arch multilib repo
+        - name: Set makepkg.conf settings
           block:
-            - blockinfile:
-                path: /etc/pacman.conf
+            - name: configure parallel package compression
+              lineinfile:
+                path: /etc/makepkg.conf
                 state: present
-                block: |
-                  [multilib]
-                  Include = /etc/pacman.d/mirrorlist
-        - name: Update Pacman package cache
-          community.general.pacman:
-            update_cache: true
-          register: cacheupdateresult
-          until: cacheupdateresult is not failed
-          retries: 5
-          delay: 2
-        - name: Ensure aria2 is installed
-          community.general.pacman:
-            name: aria2
-            state: present
-          register: ariainstallresult
-          until: ariainstallresult is not failed
-          retries: 5
-          delay: 2
-        - name: ensure ccache is installed
-          community.general.pacman:
-            name: ccache
-            state: present
-          register: ccacheinstallresult
-          until: ccacheinstallresult is not failed
-          retries: 5
-          delay: 2
-        - name: Ensure rust is installed
-          community.general.pacman:
-            name: rust
-            state: present
-          register: rustinstallresult
-          until: rustinstallresult is not failed
-          retries: 5
-          delay: 2
-        # - name: Ensure rust is installed
-        #   community.general.pacman:
-        #     name: rustup
-        #     state: present
-        #   register: rustinstallresult
-        #   until: rustinstallresult is not failed
-        #   retries: 5
-        #   delay: 2
-        # - name: Ensure rust toolochains are installed
-        #   command: "rustup toolchain install {{item}}"
-        #   with_items:
-        #     - stable-x86_64-unknown-linux-gnu
-        #     - stable-aarch64-unknown-linux-gnu
-        #   register: rusttoolchaininstallresult
-        #   until: rusttoolchaininstallresult is not failed
-        #   retries: 5
-        #   delay: 2
+                line: "COMPRESSXZ=(xz -c -z - --threads=0)"
+                regexp: "^COMPRESSXZ="
+
+            - name: configure zst package compression
+              lineinfile:
+                path: /etc/makepkg.conf
+                state: present
+                line: "PKGEXT='.pkg.tar.zst'"
+                regexp: "^PKGEXT="
+                  #
+            # - name: set C compiler flags
+            #   lineinfile:
+            #     path: /etc/makepkg.conf
+            #     state: present
+            #     line: 'CFLAGS="-march=native -O2 -pipe -fstack-protector-strong"'
+            #     regexp: "^CFLAGS="
+            # - name: set C++ compiler flags
+            #   lineinfile:
+            #     path: /etc/makepkg.conf
+            #     state: present
+            #     line: 'CXXFLAGS="${CFLAGS}"'
+            #     regexp: "^CXXFLAGS="
+
+            - name: set makepkg options
+              lineinfile:
+                path: /etc/makepkg.conf
+                state: present
+                line: "OPTIONS=(strip docs !libtool !staticlibs emptydirs zipman purge !optipng !upx !debug)"
+                regexp: "^OPTIONS="
+
+            - name: set makepkg buildenv
+              lineinfile:
+                path: /etc/makepkg.conf
+                state: present
+                line: "BUILDENV=(!distcc color ccache check !sign)"
+                regexp: "^BUILDENV="
+
+            - name: setup parallel make jobs
+              lineinfile:
+                path: /etc/makepkg.conf
+                state: present
+                line: 'MAKEFLAGS="-j {{ ansible_processor_cores * ansible_processor_threads_per_core }}"'
+                regexp: "^MAKEFLAGS="
+
+        - name: Setup Arch Repos
+          block:
+            - name: Enable Arch multilib repo
+              block:
+                - blockinfile:
+                    path: /etc/pacman.conf
+                    state: present
+                    block: |
+                      [multilib]
+                      Include = /etc/pacman.d/mirrorlist
+
+            - name: Update Pacman package cache
+              community.general.pacman:
+                update_cache: true
+              register: cacheupdateresult
+              until: cacheupdateresult is not failed
+              retries: 5
+              delay: 2
+
+        - name: Install crucial tools / compilers
+          block:
+            - name: Ensure aria2 is installed
+              community.general.pacman:
+                name: aria2
+                state: present
+              register: ariainstallresult
+              until: ariainstallresult is not failed
+              retries: 5
+              delay: 2
+
+            - name: ensure ccache is installed
+              community.general.pacman:
+                name: ccache
+                state: present
+              register: ccacheinstallresult
+              until: ccacheinstallresult is not failed
+              retries: 5
+              delay: 2
+
+            - name: Ensure rust is installed
+              community.general.pacman:
+                name: rust
+                state: present
+              register: rustinstallresult
+              until: rustinstallresult is not failed
+              retries: 5
+              delay: 2
+
+            # - name: Ensure rust is installed
+            #   community.general.pacman:
+            #     name: rustup
+            #     state: present
+            #   register: rustinstallresult
+            #   until: rustinstallresult is not failed
+            #   retries: 5
+            #   delay: 2
+            # - name: Ensure rust toolochains are installed
+            #   command: "rustup toolchain install {{item}}"
+            #   with_items:
+            #     - stable-x86_64-unknown-linux-gnu
+            #     - stable-aarch64-unknown-linux-gnu
+            #   register: rusttoolchaininstallresult
+            #   until: rusttoolchaininstallresult is not failed
+            #   retries: 5
+            #   delay: 2
+
+            - name: make sure that neovim is installed
+              kewlfft.aur.aur:
+                name: neovim
+                use: paru
+              become: yes
+              become_user: aur_builder
+              register: neoviminstallresult
+              until: neoviminstallresult is not failed
+              retries: 5
+              delay: 2
+
+    - name: Setup for installing from AUR
+      block:
+        - name: Create the `aur_builder` user
+          become: yes
+          ansible.builtin.user:
+            name: aur_builder
+            create_home: yes
+            group: wheel
+
+        - name: Allow the `aur_builder` user to run `sudo pacman` without a password
+          become: yes
+          ansible.builtin.lineinfile:
+            path: /etc/sudoers.d/11-install-aur_builder
+            line: "aur_builder ALL=(ALL) NOPASSWD: /usr/bin/pacman"
+            create: yes
+            mode: 0644
+            validate: "visudo -cf %s"
+
+        - name: Ensure aur_builder own's it's home directory recursively
+          file:
+            dest: /home/aur_builder
+            owner: aur_builder
+            group: wheel
+            mode: 0775
+            recurse: yes
+
         - name: ensure the 'paru' aur helper is installed
           kewlfft.aur.aur:
             name: paru
@@ -280,16 +312,6 @@
           become_user: aur_builder
           register: paruinstallresult
           until: paruinstallresult is not failed
-          retries: 5
-          delay: 2
-        - name: make sure that neovim is installed
-          kewlfft.aur.aur:
-            name: neovim
-            use: paru
-          become: yes
-          become_user: aur_builder
-          register: neoviminstallresult
-          until: neoviminstallresult is not failed
           retries: 5
           delay: 2
 
@@ -410,6 +432,7 @@
           ignore_errors: true
           args:
             creates: /var/cache/pkgfile/core.files
+
         - name: Create systemd-timer for updating pkfile db once per day
           block:
             - name: Create pkgfile update cron timer
@@ -437,6 +460,7 @@
 
                   [Install]
                   WantedBy=timers.target
+
         - name: Setup NTP
           block:
             - name: Set timezone
@@ -464,11 +488,13 @@
               notify: reload systemd-timesyncd
             # - name: NTP initial sync
             #   shell: "if ! /usr/bin/timedatectl status | /usr/bin/grep 'NTP synchronized: yes'; then /usr/bin/timedatectl set-ntp true; fi"
+
         - user:
             name: "ali"
             comment: "Alison Jenkins"
             groups: docker,sys,wheel,audio
             append: yes
+
         - name: Install connman aur packages
           kewlfft.aur.aur:
             name:
@@ -731,58 +757,62 @@
           retries: 5
           delay: 2
 
-    - name: Ensure sddm.conf.d exists
-      file:
-        state: directory
-        path: /etc/sddm.conf.d
-        owner: root
-        group: root
-        mode: 0775
+    - name: Setup sddm
+      block:
+      - name: Ensure sddm.conf.d exists
+        file:
+          state: directory
+          path: /etc/sddm.conf.d
+          owner: root
+          group: root
+          mode: 0775
 
-    - name: Configure sddm wayland
-      template:
-        src: /etc/ansible/templates/sddm/10-wayland.conf
-        dest: /etc/sddm.conf.d/10-wayland.conf
-        owner: root
-        group: root
-        mode: 0664
+      - name: Configure sddm wayland
+        template:
+          src: /etc/ansible/templates/sddm/10-wayland.conf
+          dest: /etc/sddm.conf.d/10-wayland.conf
+          owner: root
+          group: root
+          mode: 0664
 
-    - name: Enable sddm service
-      service:
-        name: sddm
-        enabled: true
+      - name: Enable sddm service
+        service:
+          name: sddm
+          enabled: true
 
     - name: Enable bluetooth service
       service:
         name: bluetooth
         enabled: true
 
-    - name: Enable sshd service
-      service:
-        name: sshd
-        enabled: true
+    - name: Setup SSHD
+      block:
+      - name: Enable sshd service
+        service:
+          name: sshd
+          enabled: true
 
-    - name: SSH - Disable password authentication
-      ansible.builtin.lineinfile:
-        path: /etc/ssh/sshd_config
-        regex: '^#?\s*PasswordAuthentication.*$'
-        line: "PasswordAuthentication no"
-        create: yes
-        mode: 0644
+      - name: SSH - Disable password authentication
+        ansible.builtin.lineinfile:
+          path: /etc/ssh/sshd_config
+          regex: '^#?\s*PasswordAuthentication.*$'
+          line: "PasswordAuthentication no"
+          create: yes
+          mode: 0644
 
-    - name: SSH - Authentication methods
-      ansible.builtin.lineinfile:
-        path: /etc/ssh/sshd_config
-        regex: '^#?\s*AuthenticationMethods.*$'
-        line: "AuthenticationMethods publickey"
-        create: yes
-        mode: 0644
+      - name: SSH - Authentication methods
+        ansible.builtin.lineinfile:
+          path: /etc/ssh/sshd_config
+          regex: '^#?\s*AuthenticationMethods.*$'
+          line: "AuthenticationMethods publickey"
+          create: yes
+          mode: 0644
 
-    - name: Setup SSH authorized_keys
-      ansible.posix.authorized_key:
-        user: ali
-        state: present
-        key: "{{ lookup('file', '/etc/ansible/files/ssh/id_personal.pub') }}"
+      - name: Setup SSH authorized_keys
+        ansible.posix.authorized_key:
+          user: ali
+          state: present
+          key: "{{ lookup('file', '/etc/ansible/files/ssh/id_personal.pub') }}"
 
     # - name: Enable ly service
     #   service:
@@ -879,6 +909,7 @@
       #     name: nvidia-powertarget.timer
       #     enabled: true
       #   when: nvidia_powertarget_tdp is defined
+
     - name: Create mkinitcpio conf
       tags: mkinitcpio
       template:
