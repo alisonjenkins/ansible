@@ -922,6 +922,13 @@
 
     - name: Setup user dotfiles
       block:
+        - name: Make git dir
+          file:
+            state: directory
+            owner: ali
+            group: ali
+            path: /home/ali/git
+
         - name: Clone dotfiles repo
           git:
             accept_hostkey: yes
