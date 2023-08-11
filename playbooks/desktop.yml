@@ -249,6 +249,43 @@
               retries: 5
               delay: 2
 
+            - name: Setup for installing from AUR
+              block:
+                - name: Create the `aur_builder` user
+                  become: yes
+                  ansible.builtin.user:
+                    name: aur_builder
+                    create_home: yes
+                    group: wheel
+
+                - name: Allow the `aur_builder` user to run `sudo pacman` without a password
+                  become: yes
+                  ansible.builtin.lineinfile:
+                    path: /etc/sudoers.d/11-install-aur_builder
+                    line: "aur_builder ALL=(ALL) NOPASSWD: /usr/bin/pacman"
+                    create: yes
+                    mode: 0644
+                    validate: "visudo -cf %s"
+
+                - name: Ensure aur_builder own's it's home directory recursively
+                  file:
+                    dest: /home/aur_builder
+                    owner: aur_builder
+                    group: wheel
+                    mode: 0775
+                    recurse: yes
+
+                - name: ensure the 'paru' aur helper is installed
+                  kewlfft.aur.aur:
+                    name: paru
+                    use: makepkg
+                  become: yes
+                  become_user: aur_builder
+                  register: paruinstallresult
+                  until: paruinstallresult is not failed
+                  retries: 5
+                  delay: 2
+
             # - name: Ensure rust is installed
             #   community.general.pacman:
             #     name: rustup
@@ -277,43 +314,6 @@
               until: neoviminstallresult is not failed
               retries: 5
               delay: 2
-
-    - name: Setup for installing from AUR
-      block:
-        - name: Create the `aur_builder` user
-          become: yes
-          ansible.builtin.user:
-            name: aur_builder
-            create_home: yes
-            group: wheel
-
-        - name: Allow the `aur_builder` user to run `sudo pacman` without a password
-          become: yes
-          ansible.builtin.lineinfile:
-            path: /etc/sudoers.d/11-install-aur_builder
-            line: "aur_builder ALL=(ALL) NOPASSWD: /usr/bin/pacman"
-            create: yes
-            mode: 0644
-            validate: "visudo -cf %s"
-
-        - name: Ensure aur_builder own's it's home directory recursively
-          file:
-            dest: /home/aur_builder
-            owner: aur_builder
-            group: wheel
-            mode: 0775
-            recurse: yes
-
-        - name: ensure the 'paru' aur helper is installed
-          kewlfft.aur.aur:
-            name: paru
-            use: makepkg
-          become: yes
-          become_user: aur_builder
-          register: paruinstallresult
-          until: paruinstallresult is not failed
-          retries: 5
-          delay: 2
 
     - name: Install base system
       block:
