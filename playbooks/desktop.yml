@@ -920,39 +920,54 @@
         mode: 0644
       notify: create mkinitcpio
 
-    # - name: Setup user dotfiles
-    #   block:
-    #     - file:
-    #         state: directory
-    #         path: /home/ali/.gnupg
-    #         mode: 0700
-    #         owner: ali
-    #         group: ali
-    #       become: yes
-    #       become_user: ali
-    #     # - command: "chezmoi init {{ dotfiles_repo }}"
-    #     #   become: yes
-    #     #   become_user: ali
-    #     - name: Get uid of ali user
-    #       become: false
-    #       local_action: command id -u ali
-    #       register: ali_uid
-    #     - file:
-    #         state: link
-    #         src: "/run/user/{{ ali_uid.stdout }}/keybase/kbfs/private/ajenkins/ssh_keys"
-    #         path: /home/ali/git/ssh_keys
-    #         force: yes
-    #         mode: 0700
-    #         owner: ali
-    #         group: ali
-    #     - file:
-    #         state: link
-    #         src: "/run/user/{{ ali_uid.stdout }}/keybase/kbfs/private/ajenkins/pass-password-store"
-    #         path: /home/ali/.password-store
-    #         force: yes
-    #         mode: 0700
-    #         owner: ali
-    #         group: ali
+    - name: Setup user dotfiles
+      block:
+        - name: Clone dotfiles repo
+          git:
+            accept_hostkey: yes
+            depth: 1
+            dest: /home/ali/git/stow-dotfiles
+            repo: https://github.com/alisonjenkins/stow-dotfiles.git
+          become: yes
+          become_user: ali
+
+        # - command: "chezmoi init {{ dotfiles_repo }}"
+        #   become: yes
+        #   become_user: ali
+
+      - name: Get uid of ali user
+        become: false
+        local_action: command id -u ali
+        register: ali_uid
+
+      - name: Setup KeybaseFS SSH Keys
+        file:
+          state: link
+          src: "/run/user/{{ ali_uid.stdout }}/keybase/kbfs/private/ajenkins/ssh_keys"
+          path: /home/ali/git/ssh_keys
+          force: yes
+          mode: 0700
+          owner: ali
+          group: ali
+
+      - name: Setup KeybaseFS pass password store
+        file:
+          state: link
+          src: "/run/user/{{ ali_uid.stdout }}/keybase/kbfs/private/ajenkins/pass-password-store"
+          path: /home/ali/.password-store
+          force: yes
+          mode: 0700
+          owner: ali
+          group: ali
+
+  # - file:
+  #     state: directory
+  #     path: /home/ali/.gnupg
+  #     mode: 0700
+  #     owner: ali
+  #     group: ali
+  #   become: yes
+  #   become_user: ali
 
   # - name: Mount media SMB share
   #   ansible.posix.mount:
@@ -962,11 +977,6 @@
   #     state: mounted
   #     fstype: cifs
 
-  # - git:
-  #     accept_hostkey: yes
-  #     depth: 1
-  #     dest: /home/ali/git/dotfiles
-  #     repo: https://gitlab.com/alijjenkins/dotfiles.git
   handlers:
     - name: Restart connman
       service:
