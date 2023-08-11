@@ -304,16 +304,16 @@
             #   retries: 5
             #   delay: 2
 
-    - name: make sure that neovim is installed
-      kewlfft.aur.aur:
-        name: neovim
-        use: paru
-      become: yes
-      become_user: aur_builder
-      register: neoviminstallresult
-      until: neoviminstallresult is not failed
-      retries: 5
-      delay: 2
+    # - name: make sure that neovim is installed
+    #   kewlfft.aur.aur:
+    #     name: neovim
+    #     use: paru
+    #   become: yes
+    #   become_user: aur_builder
+    #   register: neoviminstallresult
+    #   until: neoviminstallresult is not failed
+    #   retries: 5
+    #   delay: 2
 
     - name: Install base system
       block:
@@ -324,6 +324,7 @@
                 dest: /etc/sudoers.d/keep_auth_sock
                 src: "{{playbook_dir}}/../files/sudoers/keep_auth_sock"
                 validate: "visudo -cf %s"
+
             - name: wheel sudo group
               copy:
                 dest: /etc/sudoers.d/wheel_sudo
@@ -334,6 +335,7 @@
             #     dest: /etc/sudoers.d/power_commands
             #     src: "{{playbook_dir}}/../files/sudoers/power_commands"
             #     validate: "visudo -cf %s"
+
         - name: Install base packages
           kewlfft.aur.aur:
             state: present
