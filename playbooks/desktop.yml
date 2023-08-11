@@ -304,16 +304,16 @@
             #   retries: 5
             #   delay: 2
 
-            - name: make sure that neovim is installed
-              kewlfft.aur.aur:
-                name: neovim
-                use: paru
-              become: yes
-              become_user: aur_builder
-              register: neoviminstallresult
-              until: neoviminstallresult is not failed
-              retries: 5
-              delay: 2
+    - name: make sure that neovim is installed
+      kewlfft.aur.aur:
+        name: neovim
+        use: paru
+      become: yes
+      become_user: aur_builder
+      register: neoviminstallresult
+      until: neoviminstallresult is not failed
+      retries: 5
+      delay: 2
 
     - name: Install base system
       block:
