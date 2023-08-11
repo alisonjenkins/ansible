@@ -935,30 +935,30 @@
         #   become: yes
         #   become_user: ali
 
-      - name: Get uid of ali user
-        become: false
-        local_action: command id -u ali
-        register: ali_uid
+        - name: Get uid of ali user
+          become: false
+          local_action: command id -u ali
+          register: ali_uid
 
-      - name: Setup KeybaseFS SSH Keys
-        file:
-          state: link
-          src: "/run/user/{{ ali_uid.stdout }}/keybase/kbfs/private/ajenkins/ssh_keys"
-          path: /home/ali/git/ssh_keys
-          force: yes
-          mode: 0700
-          owner: ali
-          group: ali
+        - name: Setup KeybaseFS SSH Keys
+          file:
+            state: link
+            src: "/run/user/{{ ali_uid.stdout }}/keybase/kbfs/private/ajenkins/ssh_keys"
+            path: /home/ali/git/ssh_keys
+            force: yes
+            mode: 0700
+            owner: ali
+            group: ali
 
-      - name: Setup KeybaseFS pass password store
-        file:
-          state: link
-          src: "/run/user/{{ ali_uid.stdout }}/keybase/kbfs/private/ajenkins/pass-password-store"
-          path: /home/ali/.password-store
-          force: yes
-          mode: 0700
-          owner: ali
-          group: ali
+        - name: Setup KeybaseFS pass password store
+          file:
+            state: link
+            src: "/run/user/{{ ali_uid.stdout }}/keybase/kbfs/private/ajenkins/pass-password-store"
+            path: /home/ali/.password-store
+            force: yes
+            mode: 0700
+            owner: ali
+            group: ali
 
   # - file:
   #     state: directory
