@@ -489,11 +489,22 @@
             # - name: NTP initial sync
             #   shell: "if ! /usr/bin/timedatectl status | /usr/bin/grep 'NTP synchronized: yes'; then /usr/bin/timedatectl set-ntp true; fi"
 
-        - user:
-            name: "ali"
-            comment: "Alison Jenkins"
-            groups: docker,sys,wheel,audio
-            append: yes
+        - name: Make user accounts
+          block:
+            - name: Ali group
+              group:
+                name: ali
+                state: present
+                gid: 1000
+
+            - name: Ali
+              user:
+                name: "ali"
+                comment: "Alison Jenkins"
+                group: ali
+                groups: docker,sys,wheel,audio
+                append: yes
+                uid: 1000
 
         - name: Install connman aur packages
           kewlfft.aur.aur:
