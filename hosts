@@ -33,7 +33,6 @@ all:
         - block
         - keyboard
         - keymap
-        - sd-vconsole
         - plymouth
         - sd-encrypt
         - lvm2
