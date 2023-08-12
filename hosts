@@ -29,11 +29,13 @@ all:
         - udev
         - autodetect
         - modconf
+        - kms
         - block
         - keyboard
         - keymap
+        - sd-vconsole
         - plymouth
-        - encrypt
+        - sd-encrypt
         - lvm2
         - resume
         - filesystems
