@@ -2,13 +2,13 @@ all:
   hosts:
     router:
       ansible_host: 192.168.1.1
-      ansible_user: alan
+      ansible_user: ali
 
     retropie:
       ansible_host: 192.168.1.15
       ansible_user: pi
 
-    alan-desktop:
+    ali-desktop:
       ansible_connection: local
       # gamemode_overclock: true
       # gamemode_overclock_gpu: 0
@@ -42,10 +42,10 @@ all:
         - systemd
         - systemd-tool
 
-    alan-laptop:
+    ali-laptop:
       global_environment_variables:
         - export VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/intel_icd.x86_64.json:/usr/share/vulkan/icd.d/primus_vk_wrapper.json:/usr/share/vulkan/icd.d/radeon_icd.i686.json:/usr/share/vulkan/icd.d/radeon_icd.x86_64.json:/usr/share/vulkan/icd.d/nvidia_icd.json
-      dotfiles_repo: git@gitlab.com:alanjjenkins/chezmoi-dotfiles.git
+      dotfiles_repo: git@github.com:alisonjenkins/ansible.git
       ansible_connection: local
       is_laptop: true
       gamemode_overclock: false
@@ -70,10 +70,10 @@ all:
         - fsck
       use_network_manager: true
 
-    alan-worklaptop2:
+    ali-worklaptop2:
       global_environment_variables:
         - export VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/intel_icd.x86_64.json:/usr/share/vulkan/icd.d/primus_vk_wrapper.json:/usr/share/vulkan/icd.d/nvidia_icd.json
-      dotfiles_repo: git@gitlab.com:alanjjenkins/chezmoi-dotfiles.git
+      dotfiles_repo: git@github.com:alisonjenkins/stow-dotfiles.git
       ansible_connection: local
       is_laptop: true
       gamemode_overclock: false
@@ -125,8 +125,8 @@ all:
 
     desktops:
       hosts:
-        alan-desktop:
-        alan-laptop:
+        ali-desktop:
+        ali-laptop:
 
     piserver:
       hosts:
