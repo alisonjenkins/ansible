@@ -766,7 +766,7 @@
           become_user: aur_builder
           register: desktoppackagesresult
           until: desktoppackagesresult is not failed
-          retries: 5
+          retries: 10
           delay: 2
 
     - name: Setup sddm
