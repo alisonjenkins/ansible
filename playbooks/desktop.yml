@@ -317,6 +317,17 @@
 
     - name: Install base system
       block:
+        - name: Install mesa-git
+          kewlfft.aur.aur:
+            name:
+              - mesa-git
+          become: yes
+          become_user: aur_builder
+          register: mesagitresult
+          until: mesagitresult is not failed
+          retries: 5
+          delay: 2
+
         - name: Sudo cofiguration
           block:
             - name: keep ssh_auth_sock
@@ -550,17 +561,6 @@
             owner: root
             group: root
             mode: 0644
-
-        - name: Install mesa-git
-          kewlfft.aur.aur:
-            name:
-              - mesa-git
-          become: yes
-          become_user: aur_builder
-          register: mesagitresult
-          until: mesagitresult is not failed
-          retries: 5
-          delay: 2
 
         - name: Setup desktop packages
           tags: install_packages
