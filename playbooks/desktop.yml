@@ -317,16 +317,31 @@
 
     - name: Install base system
       block:
-        - name: Install mesa-git
-          kewlfft.aur.aur:
-            name:
-              - mesa-git
-          become: yes
-          become_user: aur_builder
-          register: mesagitresult
-          until: mesagitresult is not failed
-          retries: 5
-          delay: 2
+        # - name: Install mesa-git
+        #   kewlfft.aur.aur:
+        #     name:
+        #       - mesa-git
+        #   become: yes
+        #   become_user: aur_builder
+        #   register: mesagitresult
+        #   until: mesagitresult is not failed
+        #   retries: 5
+        #   delay: 2
+
+        - name: Setup Graphics Drivers
+          block:
+            - name: Install Radeon Vulkan Packages
+              kewlfft.aur.aur:
+                state: present
+                name:
+                  - vulkan-radeon
+                  - lib32-vulkan-radeon
+                become: yes
+                become_user: aur_builder
+                register: vulkanradeonresult
+                until: vulkanradeonresult is not failed
+                retries: 5
+                delay: 2
 
         - name: Sudo cofiguration
           block:
