@@ -651,7 +651,6 @@
               - lrzip
               - lshw
               - lutris
-              - ly-git
               - mariadb-clients
               - mpv
               - ncdu
@@ -826,19 +825,6 @@
           user: ali
           state: present
           key: "{{ lookup('file', '/etc/ansible/files/ssh/id_personal.pub') }}"
-
-    # - name: Enable ly service
-    #   service:
-    #     name: ly
-    #     enabled: true
-    # - name: Nvidia Xorg conf
-    #   template:
-    #     src: /etc/ansible/templates/nvidia-xorg.conf.j2
-    #     dest: /etc/X11/xorg.conf
-    #     owner: root
-    #     group: root
-    #     mode: 0664
-    #   when: is_laptop is not defined
 
     - name: Set global environment variables in /etc/environment
       template:
