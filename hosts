@@ -26,21 +26,14 @@ all:
       # uvesa_fb_resolution: 3440x1440-32
       mkinitcpio_hooks:
         - base
-        - udev
-        - autodetect
-        - modconf
-        - kms
-        - block
-        - keyboard
-        - keymap
         - systemd
         - plymouth
+        - autodetect
+        - keyboard
+        - modconf
+        - block
         - sd-encrypt
         - lvm2
-        - resume
-        - filesystems
-        - keyboard
-        - fsck
         - systemd-tool
 
     ali-laptop:
