@@ -33,6 +33,7 @@ all:
         - block
         - keyboard
         - keymap
+        - systemd
         - plymouth
         - sd-encrypt
         - lvm2
@@ -40,7 +41,6 @@ all:
         - filesystems
         - keyboard
         - fsck
-        - systemd
         - systemd-tool
 
     ali-laptop:
