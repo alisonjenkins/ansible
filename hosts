@@ -33,7 +33,7 @@ all:
         - block
         - keyboard
         - keymap
-        - plymouth
+        - sd-plymouth
         - sd-encrypt
         - lvm2
         - resume
@@ -150,5 +150,4 @@ all:
     kubernetes_workers:
       hosts:
         k8s-worker-01:
-
 # vim: set ft=yaml:
