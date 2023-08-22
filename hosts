@@ -29,6 +29,7 @@ all:
         - systemd
         - plymouth
         - autodetect
+        - fsck
         - keyboard
         - modconf
         - block
