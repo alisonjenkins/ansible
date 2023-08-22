@@ -32,6 +32,7 @@ all:
         - keyboard
         - modconf
         - block
+        - sd-vconsole
         - sd-encrypt
         - lvm2
         - systemd-tool
