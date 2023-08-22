@@ -34,7 +34,7 @@ all:
         - keyboard
         - keymap
         - systemd
-        - plymouth
+        - sd-plymouth
         - sd-encrypt
         - lvm2
         - resume
