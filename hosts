@@ -25,10 +25,11 @@ all:
       # nvidia_xorg_dpms_blank_time: 30
       # uvesa_fb_resolution: 3440x1440-32
       mkinitcpio_hooks:
-        - base
+        - autodetect
+        - kms
         - systemd
         - plymouth
-        - autodetect
+        - filesystems
         - fsck
         - keyboard
         - modconf
