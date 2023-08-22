@@ -33,7 +33,7 @@ all:
         - block
         - keyboard
         - keymap
-        - sd-plymouth
+        - plymouth
         - sd-encrypt
         - lvm2
         - resume
