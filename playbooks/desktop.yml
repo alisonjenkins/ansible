@@ -249,6 +249,43 @@
               retries: 5
               delay: 2
 
+            - name: Setup for installing from AUR
+              block:
+                - name: Create the `aur_builder` user
+                  become: yes
+                  ansible.builtin.user:
+                    name: aur_builder
+                    create_home: yes
+                    group: wheel
+
+                - name: Allow the `aur_builder` user to run `sudo pacman` without a password
+                  become: yes
+                  ansible.builtin.lineinfile:
+                    path: /etc/sudoers.d/11-install-aur_builder
+                    line: "aur_builder ALL=(ALL) NOPASSWD: /usr/bin/pacman"
+                    create: yes
+                    mode: 0644
+                    validate: "visudo -cf %s"
+
+                - name: Ensure aur_builder own's it's home directory recursively
+                  file:
+                    dest: /home/aur_builder
+                    owner: aur_builder
+                    group: wheel
+                    mode: 0775
+                    recurse: yes
+
+                - name: ensure the 'paru' aur helper is installed
+                  kewlfft.aur.aur:
+                    name: paru
+                    use: makepkg
+                  become: yes
+                  become_user: aur_builder
+                  register: paruinstallresult
+                  until: paruinstallresult is not failed
+                  retries: 5
+                  delay: 2
+
             # - name: Ensure rust is installed
             #   community.general.pacman:
             #     name: rustup
@@ -267,56 +304,45 @@
             #   retries: 5
             #   delay: 2
 
-            - name: make sure that neovim is installed
-              kewlfft.aur.aur:
-                name: neovim
-                use: paru
-              become: yes
-              become_user: aur_builder
-              register: neoviminstallresult
-              until: neoviminstallresult is not failed
-              retries: 5
-              delay: 2
-
-    - name: Setup for installing from AUR
-      block:
-        - name: Create the `aur_builder` user
-          become: yes
-          ansible.builtin.user:
-            name: aur_builder
-            create_home: yes
-            group: wheel
-
-        - name: Allow the `aur_builder` user to run `sudo pacman` without a password
-          become: yes
-          ansible.builtin.lineinfile:
-            path: /etc/sudoers.d/11-install-aur_builder
-            line: "aur_builder ALL=(ALL) NOPASSWD: /usr/bin/pacman"
-            create: yes
-            mode: 0644
-            validate: "visudo -cf %s"
-
-        - name: Ensure aur_builder own's it's home directory recursively
-          file:
-            dest: /home/aur_builder
-            owner: aur_builder
-            group: wheel
-            mode: 0775
-            recurse: yes
-
-        - name: ensure the 'paru' aur helper is installed
-          kewlfft.aur.aur:
-            name: paru
-            use: makepkg
-          become: yes
-          become_user: aur_builder
-          register: paruinstallresult
-          until: paruinstallresult is not failed
-          retries: 5
-          delay: 2
+    # - name: make sure that neovim is installed
+    #   kewlfft.aur.aur:
+    #     name: neovim
+    #     use: paru
+    #   become: yes
+    #   become_user: aur_builder
+    #   register: neoviminstallresult
+    #   until: neoviminstallresult is not failed
+    #   retries: 5
+    #   delay: 2
 
     - name: Install base system
       block:
+        # - name: Install mesa-git
+        #   kewlfft.aur.aur:
+        #     name:
+        #       - mesa-git
+        #   become: yes
+        #   become_user: aur_builder
+        #   register: mesagitresult
+        #   until: mesagitresult is not failed
+        #   retries: 5
+        #   delay: 2
+
+        - name: Setup Graphics Drivers
+          block:
+            - name: Install Radeon Vulkan Packages
+              kewlfft.aur.aur:
+                state: present
+                name:
+                  - vulkan-radeon
+                  - lib32-vulkan-radeon
+              become: yes
+              become_user: aur_builder
+              register: vulkanradeonresult
+              until: vulkanradeonresult is not failed
+              retries: 5
+              delay: 2
+
         - name: Sudo cofiguration
           block:
             - name: keep ssh_auth_sock
@@ -324,6 +350,7 @@
                 dest: /etc/sudoers.d/keep_auth_sock
                 src: "{{playbook_dir}}/../files/sudoers/keep_auth_sock"
                 validate: "visudo -cf %s"
+
             - name: wheel sudo group
               copy:
                 dest: /etc/sudoers.d/wheel_sudo
@@ -334,6 +361,7 @@
             #     dest: /etc/sudoers.d/power_commands
             #     src: "{{playbook_dir}}/../files/sudoers/power_commands"
             #     validate: "visudo -cf %s"
+
         - name: Install base packages
           kewlfft.aur.aur:
             state: present
@@ -549,17 +577,6 @@
             group: root
             mode: 0644
 
-        - name: Install mesa-git
-          kewlfft.aur.aur:
-            name:
-              - mesa-git
-          become: yes
-          become_user: aur_builder
-          register: mesagitresult
-          until: mesagitresult is not failed
-          retries: 5
-          delay: 2
-
         - name: Setup desktop packages
           tags: install_packages
           kewlfft.aur.aur:
@@ -618,7 +635,7 @@
               - file-roller
               - firefox
               - fortune-mod
-              - freemind
+              - freeplane
               - fzf
               - gamemode
               - geekbench
@@ -649,7 +666,6 @@
               - lrzip
               - lshw
               - lutris
-              - ly-git
               - mariadb-clients
               - mpv
               - ncdu
@@ -765,7 +781,7 @@
           become_user: aur_builder
           register: desktoppackagesresult
           until: desktoppackagesresult is not failed
-          retries: 5
+          retries: 10
           delay: 2
 
     - name: Setup sddm
@@ -824,19 +840,6 @@
           user: ali
           state: present
           key: "{{ lookup('file', '/etc/ansible/files/ssh/id_personal.pub') }}"
-
-    # - name: Enable ly service
-    #   service:
-    #     name: ly
-    #     enabled: true
-    # - name: Nvidia Xorg conf
-    #   template:
-    #     src: /etc/ansible/templates/nvidia-xorg.conf.j2
-    #     dest: /etc/X11/xorg.conf
-    #     owner: root
-    #     group: root
-    #     mode: 0664
-    #   when: is_laptop is not defined
 
     - name: Set global environment variables in /etc/environment
       template:
